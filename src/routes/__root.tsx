@@ -11,6 +11,10 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Toaster } from "@/components/ui/sonner";
+import { SavedProvider } from "@/hooks/use-saved";
+import { ProfileProvider } from "@/hooks/use-profile";
+
 
 function NotFoundComponent() {
   return (
