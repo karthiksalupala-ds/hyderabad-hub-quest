@@ -10,33 +10,102 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HackathonsRouteImport } from './routes/hackathons'
+import { Route as InternshipsRouteImport } from './routes/internships'
+import { Route as SavedRouteImport } from './routes/saved'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as OpportunityIdRouteImport } from './routes/opportunity.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HackathonsRoute = HackathonsRouteImport.update({
+  id: '/hackathons',
+  path: '/hackathons',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InternshipsRoute = InternshipsRouteImport.update({
+  id: '/internships',
+  path: '/internships',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SavedRoute = SavedRouteImport.update({
+  id: '/saved',
+  path: '/saved',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpportunityIdRoute = OpportunityIdRouteImport.update({
+  id: '/opportunity/$id',
+  path: '/opportunity/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/hackathons': typeof HackathonsRoute
+  '/internships': typeof InternshipsRoute
+  '/saved': typeof SavedRoute
+  '/settings': typeof SettingsRoute
+  '/opportunity/$id': typeof OpportunityIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/hackathons': typeof HackathonsRoute
+  '/internships': typeof InternshipsRoute
+  '/saved': typeof SavedRoute
+  '/settings': typeof SettingsRoute
+  '/opportunity/$id': typeof OpportunityIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/hackathons': typeof HackathonsRoute
+  '/internships': typeof InternshipsRoute
+  '/saved': typeof SavedRoute
+  '/settings': typeof SettingsRoute
+  '/opportunity/$id': typeof OpportunityIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/hackathons'
+    | '/internships'
+    | '/saved'
+    | '/settings'
+    | '/opportunity/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/hackathons'
+    | '/internships'
+    | '/saved'
+    | '/settings'
+    | '/opportunity/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/hackathons'
+    | '/internships'
+    | '/saved'
+    | '/settings'
+    | '/opportunity/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  HackathonsRoute: typeof HackathonsRoute
+  InternshipsRoute: typeof InternshipsRoute
+  SavedRoute: typeof SavedRoute
+  SettingsRoute: typeof SettingsRoute
+  OpportunityIdRoute: typeof OpportunityIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +117,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hackathons': {
+      id: '/hackathons'
+      path: '/hackathons'
+      fullPath: '/hackathons'
+      preLoaderRoute: typeof HackathonsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/internships': {
+      id: '/internships'
+      path: '/internships'
+      fullPath: '/internships'
+      preLoaderRoute: typeof InternshipsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/saved': {
+      id: '/saved'
+      path: '/saved'
+      fullPath: '/saved'
+      preLoaderRoute: typeof SavedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/opportunity/$id': {
+      id: '/opportunity/$id'
+      path: '/opportunity/$id'
+      fullPath: '/opportunity/$id'
+      preLoaderRoute: typeof OpportunityIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HackathonsRoute: HackathonsRoute,
+  InternshipsRoute: InternshipsRoute,
+  SavedRoute: SavedRoute,
+  SettingsRoute: SettingsRoute,
+  OpportunityIdRoute: OpportunityIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
