@@ -102,7 +102,7 @@ function Detail() {
           <Card className="card-elevated sticky top-20 space-y-5 p-5">
             <dl className="grid grid-cols-2 gap-4">
               <Fact label="Deadline" value={formatDate(o.deadline)} />
-              <Fact label="Mode" value={o.mode[0].toUpperCase() + o.mode.slice(1)} />
+              <Fact label="Mode" value={o.mode.charAt(0).toUpperCase() + o.mode.slice(1)} />
               {isHackathon(o) ? (
                 <>
                   <Fact label="Dates" value={formatDateRange(o.startDate, o.endDate)} />
@@ -129,7 +129,7 @@ function Detail() {
                   </a>
                 </Button>
               )}
-              <SaveButton opportunity={o} />
+              <SaveButton id={o.id} title={o.title} variant="full" />
             </div>
             <p className="text-xs text-muted-foreground">Source: {o.source}. Sample link — verify before applying.</p>
           </Card>

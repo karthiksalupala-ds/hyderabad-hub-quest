@@ -87,7 +87,7 @@ export function BrowsePage({
               <SelectContent>
                 {MODES.map((m) => (
                   <SelectItem key={m} value={m} className="capitalize">
-                    {m === "all" ? "All" : m[0].toUpperCase() + m.slice(1)}
+                    {m === "all" ? "All" : m.charAt(0).toUpperCase() + m.slice(1)}
                   </SelectItem>
                 ))}
               </SelectContent>
