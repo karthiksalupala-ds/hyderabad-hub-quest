@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useProfile } from "@/hooks/use-profile";
-import { allOpportunities, hackathons, internships } from "@/lib/data";
+import { useOpportunities } from "@/hooks/use-opportunities";
 import { daysLeft } from "@/lib/format";
 import { isOpen, matchesQuery, recommendFor, sortOpportunities } from "@/lib/filters";
 

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BrowsePage } from "@/components/browse-page";
-import { internships } from "@/lib/data";
+import { useOpportunities } from "@/hooks/use-opportunities";
 
 export const Route = createFileRoute("/internships")({
   head: () => ({
@@ -11,12 +11,15 @@ export const Route = createFileRoute("/internships")({
       { property: "og:description", content: "Find paid internships in Hyderabad and remote across India." },
     ],
   }),
-  component: () => (
+  component: function Page() {
+    const { items } = useOpportunities();
+    return (
     <BrowsePage
       kind="internship"
       title="Internships"
       description="Roles across India, with Hyderabad and remote listings first in mind."
-      items={internships}
+      items={items.filter((o) => o.kind === "internship")}
     />
-  ),
+  );
+  },
 });

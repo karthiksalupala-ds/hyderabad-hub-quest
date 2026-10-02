@@ -5,7 +5,7 @@ import { EmptyState } from "@/components/empty-state";
 import { OpportunityCard, OpportunityCardSkeleton } from "@/components/opportunity-card";
 import { Button } from "@/components/ui/button";
 import { useSaved } from "@/hooks/use-saved";
-import { allOpportunities } from "@/lib/data";
+import { useOpportunities } from "@/hooks/use-opportunities";
 import { sortOpportunities } from "@/lib/filters";
 
 export const Route = createFileRoute("/saved")({
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/saved")({
 function SavedPage() {
   const { saved, hydrated } = useSaved();
   const items = sortOpportunities(
-    allOpportunities.filter((o) => saved.includes(o.id)),
+    items.filter((o) => saved.includes(o.id)),
     "deadline",
   );
   return (
