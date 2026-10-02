@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { SavedProvider } from "@/hooks/use-saved";
 import { ProfileProvider } from "@/hooks/use-profile";
+import { OpportunitiesProvider } from "@/hooks/use-opportunities";
 
 
 function NotFoundComponent() {
@@ -129,9 +130,11 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ProfileProvider>
         <SavedProvider>
+          <OpportunitiesProvider>
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
           <Toaster richColors position="top-right" />
+          </OpportunitiesProvider>
         </SavedProvider>
       </ProfileProvider>
     </QueryClientProvider>

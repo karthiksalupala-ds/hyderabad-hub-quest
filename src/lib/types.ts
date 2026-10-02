@@ -22,39 +22,42 @@ export interface BaseOpportunity {
   sourceUrl: string;
   description: string;
   summary: string;
-  location: string;
+  location: string | null;
   city: string | null;
-  mode: "offline" | "online" | "hybrid" | "remote";
-  /** ISO date of the event start or the posting date */
-  startDate: string;
-  /** ISO date of registration / application deadline */
-  deadline: string;
+  mode: "offline" | "online" | "hybrid" | "remote" | null;
+  /** ISO date of the event start or the posting date; null when the source does not state it */
+  startDate: string | null;
+  /** ISO date of registration / application deadline; null when not stated */
+  deadline: string | null;
   eligibility: string[];
   tags: InterestTag[];
   verified: boolean;
-  /** Every record in this MVP is sample data */
-  demo: true;
+  verificationStatus: "unverified" | "verified" | "failed";
+  /** ISO timestamp of the last time the source was checked; null for demo records */
+  lastCheckedAt: string | null;
+  /** true for built-in sample records, false for live database records */
+  demo: boolean;
   postedAt: string;
 }
 
 export interface Hackathon extends BaseOpportunity {
   kind: "hackathon";
-  endDate: string;
-  /** 0 means free to enter */
-  fee: number;
-  teamSize: string;
-  prizePool: number;
+  endDate: string | null;
+  /** 0 means free to enter, null means not stated */
+  fee: number | null;
+  teamSize: string | null;
+  prizePool: number | null;
   studentFriendly: boolean;
 }
 
 export interface Internship extends BaseOpportunity {
   kind: "internship";
-  role: string;
-  duration: string;
-  /** Monthly stipend in INR, 0 means unpaid */
-  stipend: number;
-  paid: boolean;
-  openings: number;
+  role: string | null;
+  duration: string | null;
+  /** Monthly stipend in INR, 0 means unpaid, null means not stated */
+  stipend: number | null;
+  paid: boolean | null;
+  openings: number | null;
 }
 
 export type Opportunity = Hackathon | Internship;

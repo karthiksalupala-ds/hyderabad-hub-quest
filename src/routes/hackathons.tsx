@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BrowsePage } from "@/components/browse-page";
-import { hackathons } from "@/lib/data";
+import { useOpportunities } from "@/hooks/use-opportunities";
 
 export const Route = createFileRoute("/hackathons")({
   head: () => ({
@@ -11,12 +11,15 @@ export const Route = createFileRoute("/hackathons")({
       { property: "og:description", content: "In-person hackathons in Hyderabad for B.Tech students." },
     ],
   }),
-  component: () => (
+  component: function Page() {
+    const { items } = useOpportunities();
+    return (
     <BrowsePage
       kind="hackathon"
       title="Hackathons"
       description="In-person and hybrid hackathons across Hyderabad."
-      items={hackathons}
+      items={items.filter((o) => o.kind === "hackathon")}
     />
-  ),
+  );
+  },
 });

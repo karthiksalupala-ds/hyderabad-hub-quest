@@ -14,13 +14,217 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ingestion_runs: {
+        Row: {
+          error: string | null
+          expired: number
+          fetched: number
+          finished_at: string | null
+          id: string
+          inserted: number
+          rejected: number
+          source_id: string | null
+          started_at: string
+          status: string
+          updated: number
+        }
+        Insert: {
+          error?: string | null
+          expired?: number
+          fetched?: number
+          finished_at?: string | null
+          id?: string
+          inserted?: number
+          rejected?: number
+          source_id?: string | null
+          started_at?: string
+          status?: string
+          updated?: number
+        }
+        Update: {
+          error?: string | null
+          expired?: number
+          fetched?: number
+          finished_at?: string | null
+          id?: string
+          inserted?: number
+          rejected?: number
+          source_id?: string | null
+          started_at?: string
+          status?: string
+          updated?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ingestion_runs_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "source_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunities: {
+        Row: {
+          canonical_url: string
+          city: string | null
+          content_hash: string
+          deadline: string | null
+          description: string | null
+          duration: string | null
+          eligibility: string[]
+          end_date: string | null
+          fee: number | null
+          first_seen_at: string
+          id: string
+          kind: string
+          last_checked_at: string
+          location: string | null
+          mode: string | null
+          normalized_organizer: string
+          normalized_title: string
+          openings: number | null
+          organizer: string
+          posted_at: string | null
+          prize_pool: number | null
+          role: string | null
+          source_id: string
+          source_name: string
+          source_url: string
+          start_date: string | null
+          status: string
+          stipend: number | null
+          summary: string | null
+          tags: string[]
+          team_size: string | null
+          title: string
+          updated_at: string
+          verification_status: string
+        }
+        Insert: {
+          canonical_url: string
+          city?: string | null
+          content_hash: string
+          deadline?: string | null
+          description?: string | null
+          duration?: string | null
+          eligibility?: string[]
+          end_date?: string | null
+          fee?: number | null
+          first_seen_at?: string
+          id?: string
+          kind: string
+          last_checked_at?: string
+          location?: string | null
+          mode?: string | null
+          normalized_organizer: string
+          normalized_title: string
+          openings?: number | null
+          organizer: string
+          posted_at?: string | null
+          prize_pool?: number | null
+          role?: string | null
+          source_id: string
+          source_name: string
+          source_url: string
+          start_date?: string | null
+          status?: string
+          stipend?: number | null
+          summary?: string | null
+          tags?: string[]
+          team_size?: string | null
+          title: string
+          updated_at?: string
+          verification_status?: string
+        }
+        Update: {
+          canonical_url?: string
+          city?: string | null
+          content_hash?: string
+          deadline?: string | null
+          description?: string | null
+          duration?: string | null
+          eligibility?: string[]
+          end_date?: string | null
+          fee?: number | null
+          first_seen_at?: string
+          id?: string
+          kind?: string
+          last_checked_at?: string
+          location?: string | null
+          mode?: string | null
+          normalized_organizer?: string
+          normalized_title?: string
+          openings?: number | null
+          organizer?: string
+          posted_at?: string | null
+          prize_pool?: number | null
+          role?: string | null
+          source_id?: string
+          source_name?: string
+          source_url?: string
+          start_date?: string | null
+          status?: string
+          stipend?: number | null
+          summary?: string | null
+          tags?: string[]
+          team_size?: string | null
+          title?: string
+          updated_at?: string
+          verification_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "source_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      source_registry: {
+        Row: {
+          enabled: boolean
+          id: string
+          kind: string
+          last_error: string | null
+          last_success_at: string | null
+          name: string
+          requirement: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          id: string
+          kind: string
+          last_error?: string | null
+          last_success_at?: string | null
+          name: string
+          requirement?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          id?: string
+          kind?: string
+          last_error?: string | null
+          last_success_at?: string | null
+          name?: string
+          requirement?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      expire_opportunities: { Args: never; Returns: number }
     }
     Enums: {
       [_ in never]: never
