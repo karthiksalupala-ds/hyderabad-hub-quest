@@ -22,8 +22,9 @@ export const Route = createFileRoute("/saved")({
 
 function SavedPage() {
   const { saved, hydrated } = useSaved();
+  const { items: all } = useOpportunities();
   const items = sortOpportunities(
-    items.filter((o) => saved.includes(o.id)),
+    all.filter((o) => saved.includes(o.id)),
     "deadline",
   );
   return (
