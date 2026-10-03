@@ -89,12 +89,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Discover Hyderabad offline hackathons and India-wide internships in AI, data science and web development.",
       },
       { name: "author", content: "Opportunity Hub" },
+      { name: "theme-color", content: "#3b5bdb" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/favicon.ico" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
