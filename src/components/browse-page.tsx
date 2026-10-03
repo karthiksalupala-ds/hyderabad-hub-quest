@@ -43,7 +43,7 @@ export function BrowsePage({
       if (tags.length && !tags.some((t) => o.tags.includes(t))) return false;
       if (hydOnly && o.city !== "Hyderabad" && o.mode !== "remote") return false;
       if (special) {
-        if (isHackathon(o) ? o.fee > 0 : !o.paid) return false;
+        if (isHackathon(o) ? o.fee !== 0 : !o.paid) return false;
       }
       return true;
     });

@@ -89,7 +89,7 @@ export function deriveTags(text: string): string[] {
 export function detectCity(text: string): string | null {
   const m = text.match(/\b(Hyderabad|Bengaluru|Bangalore|Pune|Chennai|Mumbai|Delhi|Noida|Gurugram)\b/i);
   if (!m) return null;
-  const c = m[1].toLowerCase();
+  const c = (m[1] ?? "").toLowerCase();
   return c === "bangalore" ? "Bengaluru" : c.charAt(0).toUpperCase() + c.slice(1);
 }
 

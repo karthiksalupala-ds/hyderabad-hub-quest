@@ -59,12 +59,13 @@ function Kpi({
 function Dashboard() {
   const [query, setQuery] = useState("");
   const { profile } = useProfile();
+  const { items } = useOpportunities();
 
-  const open = useMemo(() => allOpportunities.filter(isOpen), []);
+  const open = useMemo(() => items.filter(isOpen), [items]);
   const filtered = useMemo(() => open.filter((o) => matchesQuery(o, query)), [open, query]);
 
   const urgent = useMemo(
-    () => sortOpportunities(filtered, "deadline").filter((o) => daysLeft(o.deadline) <= 7).slice(0, 3),
+    () => sortOpportunities(filtered, "deadline").filter((o) => (daysLeft(o.deadline) ?? 99) <= 7).slice(0, 3),
     [filtered],
   );
   const recommended = useMemo(
@@ -75,7 +76,7 @@ function Dashboard() {
 
   const kpis = {
     open: open.length,
-    week: open.filter((o) => daysLeft(o.deadline) <= 7).length,
+    week: open.filter((o) => (daysLeft(o.deadline) ?? 99) <= 7).length,
     hydOffline: open.filter((o) => o.city === "Hyderabad" && o.mode !== "remote").length,
     remote: open.filter((o) => o.kind === "internship" && o.mode === "remote").length,
   };
@@ -117,7 +118,7 @@ function Dashboard() {
             </Link>
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {hackathons.length} in-person events across IIIT Hyderabad, Madhapur, Gachibowli and more.
+            {items.filter((o) => o.kind === "hackathon").length} listed — events across IIIT Hyderabad, Madhapur, Gachibowli and more.
           </p>
         </Card>
         <Card className="card-elevated group relative overflow-hidden p-6">
@@ -128,7 +129,7 @@ function Dashboard() {
             </Link>
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {internships.length} roles across AI/ML, data science, analytics and web development.
+            {items.filter((o) => o.kind === "internship").length} roles across AI/ML, data science, analytics and web development.
           </p>
         </Card>
       </div>
@@ -162,7 +163,7 @@ function Dashboard() {
                         </Link>
                       </p>
                       <p className="truncate text-sm text-muted-foreground">
-                        {o.organizer} · {o.location}
+                        {o.organizer} · {o.location ?? "Location not stated"}
                       </p>
                     </div>
                     <DeadlinePill deadline={o.deadline} />

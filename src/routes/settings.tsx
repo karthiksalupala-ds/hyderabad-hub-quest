@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useProfile } from "@/hooks/use-profile";
+import { AgentStatus } from "@/components/agent-status";
 import { ALL_TAGS } from "@/lib/types";
 
 export const Route = createFileRoute("/settings")({
@@ -34,6 +35,7 @@ function SettingsPage() {
       <p className="mt-1 text-sm text-muted-foreground">Changes save automatically on this device.</p>
 
       <div className="mt-6 grid gap-4">
+        <AgentStatus />
         <Card className="card-elevated p-5">
           <Label htmlFor="name">Display name</Label>
           <Input

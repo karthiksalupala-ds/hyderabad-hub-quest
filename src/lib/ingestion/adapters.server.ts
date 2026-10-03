@@ -39,12 +39,12 @@ function readFeeds(envName: string): FeedConfig[] {
 
 function tag(block: string, name: string): string | null {
   const m = block.match(new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)</${name}>`, "i"));
-  return m ? stripHtml(m[1]) || null : null;
+  return m ? stripHtml(m[1] ?? "") || null : null;
 }
 
 function atomLink(block: string): string | null {
   const m = block.match(/<link[^>]*href="([^"]+)"[^>]*\/?>/i);
-  return m ? m[1] : null;
+  return m ? (m[1] ?? null) : null;
 }
 
 export function parseFeed(xml: string, cfg: FeedConfig): RawItem[] {

@@ -17,11 +17,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSaved } from "@/hooks/use-saved";
+import { relativeTime } from "@/lib/format";
 import { deadlineLabel, deadlineTone, formatDate, formatDateRange, formatINR } from "@/lib/format";
 import { isHackathon, type Opportunity } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-export function DeadlinePill({ deadline, className }: { deadline: string; className?: string }) {
+export function DeadlinePill({ deadline, className }: { deadline: string | null; className?: string }) {
   const tone = deadlineTone(deadline);
   return (
     <span
@@ -76,7 +77,7 @@ export function SaveButton({
   );
 }
 
-const MODE_LABEL: Record<Opportunity["mode"], string> = {
+const MODE_LABEL: Record<NonNullable<Opportunity["mode"]>, string> = {
   offline: "In-person",
   online: "Online",
   hybrid: "Hybrid",
@@ -112,9 +113,11 @@ export function OpportunityCard({
               Verified
             </Badge>
           )}
-          <Badge variant="outline" className="border-dashed text-muted-foreground">
-            Demo Data
-          </Badge>
+          {o.demo ? (
+            <Badge variant="outline" className="border-dashed text-muted-foreground">Demo Data</Badge>
+          ) : !o.verified ? (
+            <Badge variant="outline" className="capitalize text-muted-foreground">{o.verificationStatus}</Badge>
+          ) : null}
         </div>
 
         <h3 className="mt-3 text-base font-semibold leading-snug">
@@ -134,7 +137,7 @@ export function OpportunityCard({
             <MapPin className="h-4 w-4 shrink-0" aria-hidden />
             <dt className="sr-only">Location</dt>
             <dd className="truncate">
-              {o.location} · {MODE_LABEL[o.mode]}
+              {o.location ?? "Location not stated"} · {o.mode ? MODE_LABEL[o.mode] : "Mode not stated"}
             </dd>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
@@ -155,10 +158,12 @@ export function OpportunityCard({
               {hack
                 ? o.fee === 0
                   ? "Free entry"
-                  : `${formatINR(o.fee)} entry`
-                : o.paid
-                  ? `${formatINR(o.stipend)}/month`
-                  : "Unpaid"}
+                  : o.fee === null ? "Fee not stated" : `${formatINR(o.fee)} entry`
+                : o.paid === null
+                  ? "Stipend not stated"
+                  : o.paid
+                    ? `${formatINR(o.stipend)}/month`
+                    : "Unpaid"}
             </dd>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
@@ -168,10 +173,11 @@ export function OpportunityCard({
               <Clock className="h-4 w-4 shrink-0" aria-hidden />
             )}
             <dt className="sr-only">{hack ? "Prize pool" : "Duration"}</dt>
-            <dd className="truncate">{hack ? `${formatINR(o.prizePool)} prizes` : o.duration}</dd>
+            <dd className="truncate">{hack ? (o.prizePool === null ? "Prize not stated" : `${formatINR(o.prizePool)} prizes`) : (o.duration ?? "Duration not stated")}</dd>
           </div>
         </dl>
 
+        <SourceMeta o={o} compact />
         <div className="mt-4 flex flex-wrap gap-1.5">
           {o.tags.map((t) => (
             <Badge key={t} variant="secondary" className="font-normal">
@@ -209,5 +215,26 @@ export function OpportunityCardSkeleton() {
         <Skeleton className="h-6 w-16 rounded-full" />
       </div>
     </Card>
+  );
+}
+
+export function SourceMeta({ o, compact = false }: { o: Opportunity; compact?: boolean }) {
+  if (o.demo) {
+    return (
+      <p className={cn("text-xs text-muted-foreground", compact ? "mt-3" : "")}>
+        Source: {o.source} — sample record, not a real listing.
+      </p>
+    );
+  }
+  return (
+    <p className={cn("relative z-10 text-xs text-muted-foreground", compact ? "mt-3" : "")}>
+      Source:{" "}
+      <a href={o.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
+        {o.source}
+      </a>
+      {" · "}
+      <span className="capitalize">{o.verificationStatus}</span>
+      {" · "}Checked {relativeTime(o.lastCheckedAt)}
+    </p>
   );
 }
