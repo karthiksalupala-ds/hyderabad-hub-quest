@@ -14,8 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      ingestion_events: {
+        Row: {
+          error: string | null
+          event_type: string
+          external_run_id: string | null
+          id: string
+          received_at: string
+          source_id: string | null
+          status: string
+        }
+        Insert: {
+          error?: string | null
+          event_type: string
+          external_run_id?: string | null
+          id?: string
+          received_at?: string
+          source_id?: string | null
+          status?: string
+        }
+        Update: {
+          error?: string | null
+          event_type?: string
+          external_run_id?: string | null
+          id?: string
+          received_at?: string
+          source_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ingestion_events_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "source_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ingestion_runs: {
         Row: {
+          accepted: number
+          duplicates: number
           error: string | null
           expired: number
           fetched: number
@@ -26,9 +66,12 @@ export type Database = {
           source_id: string | null
           started_at: string
           status: string
+          trigger: string
           updated: number
         }
         Insert: {
+          accepted?: number
+          duplicates?: number
           error?: string | null
           expired?: number
           fetched?: number
@@ -39,9 +82,12 @@ export type Database = {
           source_id?: string | null
           started_at?: string
           status?: string
+          trigger?: string
           updated?: number
         }
         Update: {
+          accepted?: number
+          duplicates?: number
           error?: string | null
           expired?: number
           fetched?: number
@@ -52,6 +98,7 @@ export type Database = {
           source_id?: string | null
           started_at?: string
           status?: string
+          trigger?: string
           updated?: number
         }
         Relationships: [
@@ -66,6 +113,7 @@ export type Database = {
       }
       opportunities: {
         Row: {
+          application_url: string | null
           canonical_url: string
           city: string | null
           content_hash: string
@@ -74,10 +122,13 @@ export type Database = {
           duration: string | null
           eligibility: string[]
           end_date: string | null
+          evidence_json: Json | null
           fee: number | null
           first_seen_at: string
           id: string
           kind: string
+          last_change_at: string | null
+          last_change_summary: string | null
           last_checked_at: string
           location: string | null
           mode: string | null
@@ -87,6 +138,8 @@ export type Database = {
           organizer: string
           posted_at: string | null
           prize_pool: number | null
+          raw_source_hash: string | null
+          relevance_score: number | null
           role: string | null
           source_id: string
           source_name: string
@@ -99,9 +152,11 @@ export type Database = {
           team_size: string | null
           title: string
           updated_at: string
+          verification_reasons: string[]
           verification_status: string
         }
         Insert: {
+          application_url?: string | null
           canonical_url: string
           city?: string | null
           content_hash: string
@@ -110,10 +165,13 @@ export type Database = {
           duration?: string | null
           eligibility?: string[]
           end_date?: string | null
+          evidence_json?: Json | null
           fee?: number | null
           first_seen_at?: string
           id?: string
           kind: string
+          last_change_at?: string | null
+          last_change_summary?: string | null
           last_checked_at?: string
           location?: string | null
           mode?: string | null
@@ -123,6 +181,8 @@ export type Database = {
           organizer: string
           posted_at?: string | null
           prize_pool?: number | null
+          raw_source_hash?: string | null
+          relevance_score?: number | null
           role?: string | null
           source_id: string
           source_name: string
@@ -135,9 +195,11 @@ export type Database = {
           team_size?: string | null
           title: string
           updated_at?: string
+          verification_reasons?: string[]
           verification_status?: string
         }
         Update: {
+          application_url?: string | null
           canonical_url?: string
           city?: string | null
           content_hash?: string
@@ -146,10 +208,13 @@ export type Database = {
           duration?: string | null
           eligibility?: string[]
           end_date?: string | null
+          evidence_json?: Json | null
           fee?: number | null
           first_seen_at?: string
           id?: string
           kind?: string
+          last_change_at?: string | null
+          last_change_summary?: string | null
           last_checked_at?: string
           location?: string | null
           mode?: string | null
@@ -159,6 +224,8 @@ export type Database = {
           organizer?: string
           posted_at?: string | null
           prize_pool?: number | null
+          raw_source_hash?: string | null
+          relevance_score?: number | null
           role?: string | null
           source_id?: string
           source_name?: string
@@ -171,6 +238,7 @@ export type Database = {
           team_size?: string | null
           title?: string
           updated_at?: string
+          verification_reasons?: string[]
           verification_status?: string
         }
         Relationships: [
@@ -183,38 +251,119 @@ export type Database = {
           },
         ]
       }
+      opportunity_changes: {
+        Row: {
+          change_type: string
+          created_at: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+          opportunity_id: string | null
+          run_id: string | null
+        }
+        Insert: {
+          change_type: string
+          created_at?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          opportunity_id?: string | null
+          run_id?: string | null
+        }
+        Update: {
+          change_type?: string
+          created_at?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          opportunity_id?: string | null
+          run_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_changes_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_changes_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "ingestion_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       source_registry: {
         Row: {
+          actor_id: string | null
+          allowed_start_urls: string[]
+          default_kind: string | null
+          discovery_method: string
           enabled: boolean
+          endpoint: string | null
+          field_mapping: Json
           id: string
           kind: string
+          last_counts: Json | null
           last_error: string | null
+          last_run_at: string | null
           last_success_at: string | null
           name: string
+          official_domains: string[]
+          poll_interval_minutes: number
+          priority: number
           requirement: string | null
           status: string
+          supports_webhook: boolean
           updated_at: string
         }
         Insert: {
+          actor_id?: string | null
+          allowed_start_urls?: string[]
+          default_kind?: string | null
+          discovery_method?: string
           enabled?: boolean
+          endpoint?: string | null
+          field_mapping?: Json
           id: string
           kind: string
+          last_counts?: Json | null
           last_error?: string | null
+          last_run_at?: string | null
           last_success_at?: string | null
           name: string
+          official_domains?: string[]
+          poll_interval_minutes?: number
+          priority?: number
           requirement?: string | null
           status?: string
+          supports_webhook?: boolean
           updated_at?: string
         }
         Update: {
+          actor_id?: string | null
+          allowed_start_urls?: string[]
+          default_kind?: string | null
+          discovery_method?: string
           enabled?: boolean
+          endpoint?: string | null
+          field_mapping?: Json
           id?: string
           kind?: string
+          last_counts?: Json | null
           last_error?: string | null
+          last_run_at?: string | null
           last_success_at?: string | null
           name?: string
+          official_domains?: string[]
+          poll_interval_minutes?: number
+          priority?: number
           requirement?: string | null
           status?: string
+          supports_webhook?: boolean
           updated_at?: string
         }
         Relationships: []
@@ -225,6 +374,14 @@ export type Database = {
     }
     Functions: {
       expire_opportunities: { Args: never; Returns: number }
+      opportunity_counts: {
+        Args: never
+        Returns: {
+          n: number
+          status: string
+          verification_status: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -8,6 +8,13 @@
       "when": 1790916342242,
       "tag": "0000_live_opportunities",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791133288793,
+      "tag": "0001_acquisition_agent",
+      "breakpoints": true
     }
   ]
 }
