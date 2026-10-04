@@ -16,6 +16,7 @@ import { Route as SavedRouteImport } from './routes/saved'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as OpportunityIdRouteImport } from './routes/opportunity.$id'
 import { Route as ApiPublicIngestRouteImport } from './routes/api/public/ingest'
+import { Route as ApiPublicWebhooksApifyRouteImport } from './routes/api/public/webhooks/apify'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +53,11 @@ const ApiPublicIngestRoute = ApiPublicIngestRouteImport.update({
   path: '/api/public/ingest',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWebhooksApifyRoute = ApiPublicWebhooksApifyRouteImport.update({
+  id: '/api/public/webhooks/apify',
+  path: '/api/public/webhooks/apify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/opportunity/$id': typeof OpportunityIdRoute
   '/api/public/ingest': typeof ApiPublicIngestRoute
+  '/api/public/webhooks/apify': typeof ApiPublicWebhooksApifyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/opportunity/$id': typeof OpportunityIdRoute
   '/api/public/ingest': typeof ApiPublicIngestRoute
+  '/api/public/webhooks/apify': typeof ApiPublicWebhooksApifyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/opportunity/$id': typeof OpportunityIdRoute
   '/api/public/ingest': typeof ApiPublicIngestRoute
+  '/api/public/webhooks/apify': typeof ApiPublicWebhooksApifyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/opportunity/$id'
     | '/api/public/ingest'
+    | '/api/public/webhooks/apify'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/opportunity/$id'
     | '/api/public/ingest'
+    | '/api/public/webhooks/apify'
   id:
     | '__root__'
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/opportunity/$id'
     | '/api/public/ingest'
+    | '/api/public/webhooks/apify'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +131,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   OpportunityIdRoute: typeof OpportunityIdRoute
   ApiPublicIngestRoute: typeof ApiPublicIngestRoute
+  ApiPublicWebhooksApifyRoute: typeof ApiPublicWebhooksApifyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIngestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/webhooks/apify': {
+      id: '/api/public/webhooks/apify'
+      path: '/api/public/webhooks/apify'
+      fullPath: '/api/public/webhooks/apify'
+      preLoaderRoute: typeof ApiPublicWebhooksApifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,6 +203,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   OpportunityIdRoute: OpportunityIdRoute,
   ApiPublicIngestRoute: ApiPublicIngestRoute,
+  ApiPublicWebhooksApifyRoute: ApiPublicWebhooksApifyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
