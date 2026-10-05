@@ -20,7 +20,11 @@ export type Database = {
           event_type: string
           external_run_id: string | null
           id: string
+          idempotency_key: string | null
+          payload_hash: string | null
+          processed_at: string | null
           received_at: string
+          run_id: string | null
           source_id: string | null
           status: string
         }
@@ -29,7 +33,11 @@ export type Database = {
           event_type: string
           external_run_id?: string | null
           id?: string
+          idempotency_key?: string | null
+          payload_hash?: string | null
+          processed_at?: string | null
           received_at?: string
+          run_id?: string | null
           source_id?: string | null
           status?: string
         }
@@ -38,11 +46,22 @@ export type Database = {
           event_type?: string
           external_run_id?: string | null
           id?: string
+          idempotency_key?: string | null
+          payload_hash?: string | null
+          processed_at?: string | null
           received_at?: string
+          run_id?: string | null
           source_id?: string | null
           status?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ingestion_events_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "ingestion_runs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ingestion_events_source_id_fkey"
             columns: ["source_id"]
@@ -56,12 +75,16 @@ export type Database = {
         Row: {
           accepted: number
           duplicates: number
+          duration_ms: number | null
           error: string | null
+          errors: Json
           expired: number
           fetched: number
           finished_at: string | null
           id: string
+          idempotency_key: string | null
           inserted: number
+          needs_verification: number
           rejected: number
           source_id: string | null
           started_at: string
@@ -72,12 +95,16 @@ export type Database = {
         Insert: {
           accepted?: number
           duplicates?: number
+          duration_ms?: number | null
           error?: string | null
+          errors?: Json
           expired?: number
           fetched?: number
           finished_at?: string | null
           id?: string
+          idempotency_key?: string | null
           inserted?: number
+          needs_verification?: number
           rejected?: number
           source_id?: string | null
           started_at?: string
@@ -88,12 +115,16 @@ export type Database = {
         Update: {
           accepted?: number
           duplicates?: number
+          duration_ms?: number | null
           error?: string | null
+          errors?: Json
           expired?: number
           fetched?: number
           finished_at?: string | null
           id?: string
+          idempotency_key?: string | null
           inserted?: number
+          needs_verification?: number
           rejected?: number
           source_id?: string | null
           started_at?: string
@@ -299,7 +330,9 @@ export type Database = {
       source_registry: {
         Row: {
           actor_id: string | null
+          adapter_config: Json
           allowed_start_urls: string[]
+          consecutive_empty_runs: number
           default_kind: string | null
           discovery_method: string
           enabled: boolean
@@ -309,9 +342,11 @@ export type Database = {
           kind: string
           last_counts: Json | null
           last_error: string | null
+          last_manual_run_at: string | null
           last_run_at: string | null
           last_success_at: string | null
           name: string
+          next_run_at: string | null
           official_domains: string[]
           poll_interval_minutes: number
           priority: number
@@ -322,7 +357,9 @@ export type Database = {
         }
         Insert: {
           actor_id?: string | null
+          adapter_config?: Json
           allowed_start_urls?: string[]
+          consecutive_empty_runs?: number
           default_kind?: string | null
           discovery_method?: string
           enabled?: boolean
@@ -332,9 +369,11 @@ export type Database = {
           kind: string
           last_counts?: Json | null
           last_error?: string | null
+          last_manual_run_at?: string | null
           last_run_at?: string | null
           last_success_at?: string | null
           name: string
+          next_run_at?: string | null
           official_domains?: string[]
           poll_interval_minutes?: number
           priority?: number
@@ -345,7 +384,9 @@ export type Database = {
         }
         Update: {
           actor_id?: string | null
+          adapter_config?: Json
           allowed_start_urls?: string[]
+          consecutive_empty_runs?: number
           default_kind?: string | null
           discovery_method?: string
           enabled?: boolean
@@ -355,9 +396,11 @@ export type Database = {
           kind?: string
           last_counts?: Json | null
           last_error?: string | null
+          last_manual_run_at?: string | null
           last_run_at?: string | null
           last_success_at?: string | null
           name?: string
+          next_run_at?: string | null
           official_domains?: string[]
           poll_interval_minutes?: number
           priority?: number

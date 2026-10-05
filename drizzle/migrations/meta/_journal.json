@@ -15,6 +15,13 @@
       "when": 1791133288793,
       "tag": "0001_acquisition_agent",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791213853701,
+      "tag": "0002_ingestion_engine",
+      "breakpoints": true
     }
   ]
 }
