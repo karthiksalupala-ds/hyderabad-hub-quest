@@ -121,10 +121,10 @@ export function deriveTags(text: string): string[] {
 }
 
 export function detectCity(text: string): string | null {
-  const m = text.match(/\b(Hyderabad|Secunderabad|Bengaluru|Bangalore|Pune|Chennai|Mumbai|Delhi|Noida|Gurugram)\b/i);
+  const m = text.match(/\b(Hyderabad|Secunderabad|Hitech City|HITEC City|Gachibowli|Madhapur|Kondapur|Bengaluru|Bangalore|Pune|Chennai|Mumbai|Delhi|Noida|Gurugram)\b/i);
   if (!m) return null;
   const c = (m[1] ?? "").toLowerCase();
-  if (c === "secunderabad") return "Hyderabad";
+  if (/secunderabad|hite?ch? city|gachibowli|madhapur|kondapur/.test(c)) return "Hyderabad";
   return c === "bangalore" ? "Bengaluru" : c.charAt(0).toUpperCase() + c.slice(1);
 }
 
