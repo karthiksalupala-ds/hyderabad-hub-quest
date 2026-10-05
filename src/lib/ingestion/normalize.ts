@@ -61,11 +61,45 @@ export async function contentHash(parts: (string | number | null | undefined | s
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-/** Returns an ISO date (YYYY-MM-DD) only when the input parses unambiguously. */
+const MONTHS: Record<string, number> = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, sept: 9, oct: 10, nov: 11, dec: 12 };
+const pad = (n: number) => String(n).padStart(2, "0");
+function ymd(y: number, m: number, d: number): string | null {
+  if (y < 2000 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31) return null;
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return dt.getUTCMonth() === m - 1 ? `${y}-${pad(m)}-${pad(d)}` : null;
+}
+
+/**
+ * Returns an ISO date (YYYY-MM-DD) only when the input parses unambiguously.
+ * Numeric dates like 03/04/2026 are rejected unless one part is > 12 (then read as Indian DD/MM).
+ */
 export function toIsoDate(s: string | null | undefined): string | null {
   if (!s) return null;
-  const d = new Date(s);
-  return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
+  const t = s.trim();
+  let m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:$|[T\s])/);
+  if (m) return ymd(+m[1]!, +m[2]!, +m[3]!);
+  m = t.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/);
+  if (m) {
+    const a = +m[1]!, b = +m[2]!, y = +m[3]!;
+    if (a > 12 && b <= 12) return ymd(y, b, a);
+    if (b > 12 && a <= 12) return ymd(y, a, b);
+    return a === b ? ymd(y, a, b) : null; // ambiguous
+  }
+  m = t.match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3,9})\.?,?\s+(\d{4})/);
+  if (m) { const mo = MONTHS[m[2]!.slice(0, m[2]!.toLowerCase().startsWith("sept") ? 4 : 3).toLowerCase()]; return mo ? ymd(+m[3]!, mo, +m[1]!) : null; }
+  m = t.match(/^([A-Za-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})/);
+  if (m) { const mo = MONTHS[m[1]!.slice(0, 3).toLowerCase()]; return mo ? ymd(+m[3]!, mo, +m[2]!) : null; }
+  // RFC 2822 / ISO timestamps from feeds
+  if (/^[A-Za-z]{3},\s+\d{1,2}\s+[A-Za-z]{3}\s+\d{4}/.test(t) || /^\d{4}-\d{2}-\d{2}T/.test(t) || /^\d{13}$/.test(t)) {
+    const d = new Date(/^\d{13}$/.test(t) ? Number(t) : t);
+    return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
+  }
+  return null;
+}
+
+/** Stable key for safe fuzzy dedupe: organizer + title (+ date when known). */
+export function dedupeKey(organizer: string, title: string, date: string | null): string {
+  return [normalizeOrganizer(organizer), normalizeText(title), date ?? ""].join("|");
 }
 
 const TAG_RULES: [string, RegExp][] = [
@@ -87,9 +121,10 @@ export function deriveTags(text: string): string[] {
 }
 
 export function detectCity(text: string): string | null {
-  const m = text.match(/\b(Hyderabad|Bengaluru|Bangalore|Pune|Chennai|Mumbai|Delhi|Noida|Gurugram)\b/i);
+  const m = text.match(/\b(Hyderabad|Secunderabad|Bengaluru|Bangalore|Pune|Chennai|Mumbai|Delhi|Noida|Gurugram)\b/i);
   if (!m) return null;
   const c = (m[1] ?? "").toLowerCase();
+  if (c === "secunderabad") return "Hyderabad";
   return c === "bangalore" ? "Bengaluru" : c.charAt(0).toUpperCase() + c.slice(1);
 }
 
