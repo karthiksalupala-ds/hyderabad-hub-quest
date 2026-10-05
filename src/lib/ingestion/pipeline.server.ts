@@ -37,13 +37,13 @@ export async function processItems(admin: Admin, src: SourceRow, items: RawItem[
       if (ex.content_hash === content_hash) { await admin.from("opportunities").update({ last_checked_at: now }).eq("id", ex.id); continue; }
       const changes = detectChanges(ex, row);
       await admin.from("opportunities").update({ ...row, content_hash, last_checked_at: now, updated_at: now, last_change_at: changes.length ? now : null, last_change_summary: changes.map((x) => x.change_type).join(", ") || null }).eq("id", ex.id);
-      if (changes.length) await admin.from("opportunity_changes").insert(changes.map((x) => ({ ...x, opportunity_id: ex!.id, run_id: run?.id })));
+      if (changes.length) await admin.from("opportunity_changes").insert(changes.map((x) => ({ ...x, opportunity_id: ex!.id, run_id: run?.id ?? null })));
       c.updated++;
     } else {
       const { data: ins, error } = await admin.from("opportunities").insert({ ...row, content_hash }).select("id").single();
       if (error) { c.rejected++; continue; }
       c.inserted++;
-      await admin.from("opportunity_changes").insert({ opportunity_id: ins.id, run_id: run?.id, change_type: "new", new_value: row.title });
+      await admin.from("opportunity_changes").insert({ opportunity_id: ins.id, run_id: run?.id ?? null, change_type: "new", new_value: row.title });
     }
     if (gate.status === "verified") c.accepted++;
   }
@@ -57,7 +57,7 @@ export async function processItems(admin: Admin, src: SourceRow, items: RawItem[
 export async function expireListings(admin: Admin, runId?: string) {
   const today = new Date().toISOString().slice(0, 10);
   const { data } = await admin.from("opportunities").update({ status: "expired" }).eq("status", "active").lt("deadline", today).select("id,deadline");
-  if (data?.length) await admin.from("opportunity_changes").insert(data.map((d) => ({ opportunity_id: d.id, run_id: runId, change_type: "expired", old_value: d.deadline })));
+  if (data?.length) await admin.from("opportunity_changes").insert(data.map((d) => ({ opportunity_id: d.id, run_id: runId ?? null, change_type: "expired", old_value: d.deadline })));
   return data?.length ?? 0;
 }
 
