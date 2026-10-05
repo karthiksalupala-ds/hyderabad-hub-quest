@@ -79,7 +79,7 @@ export function mapRecord(rec: unknown, mapping: FieldMapping, defaultKind: "hac
     startDate: toIsoDate(str(f("startDate"))),
     endDate: toIsoDate(str(f("endDate"))),
     location: str(f("location")),
-    mode: toMode(f("mode")),
+    mode: toMode(f("mode")) ?? null,
     role: str(f("role")),
     fee: toAmount(f("fee")),
     prize: toAmount(f("prize")),
