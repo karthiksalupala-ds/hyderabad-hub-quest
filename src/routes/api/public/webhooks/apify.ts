@@ -21,7 +21,7 @@ export const Route = createFileRoute("/api/public/webhooks/apify")({
         const missing = apifyMissing(src);
         if (missing) return new Response(missing, { status: 409 });
         try {
-          const result = await processItems(supabaseAdmin, src, await readApifyDataset(src, ds), src.official_domains, "webhook");
+          const result = await processItems(supabaseAdmin, src, await readApifyDataset(src, ds), src.official_domains, { trigger: "webhook", idempotencyKey: body.resource.id ? `apify:${body.resource.id}` : null });
           await supabaseAdmin.from("ingestion_events").insert({ source_id: src.id, event_type: body.eventType ?? "run.succeeded", external_run_id: body.resource.id ?? null, status: "processed" });
           return Response.json(result);
         } catch (e) {

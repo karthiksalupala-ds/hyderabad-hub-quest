@@ -31,7 +31,7 @@ export const MAPPABLE_FIELDS = [
 ] as const;
 export type FieldMapping = Partial<Record<(typeof MAPPABLE_FIELDS)[number], string>>;
 
-function pick(obj: unknown, path: string | undefined): unknown {
+export function pick(obj: unknown, path: string | undefined): unknown {
   if (!path) return undefined;
   return path.split(".").reduce<unknown>((o, k) => (o && typeof o === "object" ? (o as Record<string, unknown>)[k] : undefined), obj);
 }
@@ -122,23 +122,41 @@ export function parseAiExtraction(text: string): AiExtraction | null {
   }
 }
 
-/** Merge AI output into gaps only; textual facts must literally appear in the evidence. */
+/** True when the number literally appears in the evidence (commas ignored, "10k"/"1 lakh" style accepted). */
+export function numberGrounded(n: number | null, evidence: string): number | null {
+  if (n === null || !Number.isFinite(n) || n < 0) return null;
+  const ev = evidence.replace(/,/g, "").toLowerCase();
+  const forms = [String(n)];
+  if (n >= 1000 && n % 1000 === 0) forms.push(`${n / 1000}k`, `${n / 1000} k`);
+  if (n >= 100000 && n % 100000 === 0) forms.push(`${n / 100000} lakh`, `${n / 100000}l`, `${n / 100000} lac`);
+  return forms.some((f) => new RegExp(`(^|[^\\d.])${f.replace(/\./g, "\\.")}(?![\\d])`).test(ev)) ? n : null;
+}
+
+/** AI dates are kept only when they parse and their year is stated in the evidence. */
+export function dateGrounded(d: string | null, evidence: string): string | null {
+  const iso = toIsoDate(d);
+  return iso && evidence.includes(iso.slice(0, 4)) ? iso : null;
+}
+
+/** Merge AI output into gaps only; every fact must be grounded in the evidence, otherwise it stays null. */
 export function mergeAi(item: RawItem, ai: AiExtraction, evidence: string): RawItem {
   const ev = evidence.toLowerCase();
-  const grounded = (v: string | null) => (v && ev.includes(v.toLowerCase()) ? v : null);
+  const grounded = (v: string | null) => (v && v.trim().length > 1 && ev.includes(v.toLowerCase()) ? v : null);
+  const modeWord = ai.mode && (ai.mode === "offline" ? /in[- ]?person|offline|on[- ]?site/.test(ev) : ev.includes(ai.mode)) ? ai.mode : null;
   return {
     ...item,
     kind: item.kind,
     organizer: item.organizer ?? grounded(ai.organizer),
     role: item.role ?? grounded(ai.role),
     location: item.location ?? grounded(ai.location),
-    mode: item.mode ?? ai.mode,
-    startDate: item.startDate ?? toIsoDate(ai.start_date),
-    endDate: item.endDate ?? toIsoDate(ai.end_date),
-    deadline: item.deadline ?? toIsoDate(ai.deadline),
-    fee: item.fee ?? ai.fee,
-    prize: item.prize ?? ai.prize,
-    stipend: item.stipend ?? ai.stipend,
+    mode: item.mode ?? modeWord,
+    startDate: item.startDate ?? dateGrounded(ai.start_date, evidence),
+    endDate: item.endDate ?? dateGrounded(ai.end_date, evidence),
+    deadline: item.deadline ?? dateGrounded(ai.deadline, evidence),
+    fee: item.fee ?? numberGrounded(ai.fee, evidence),
+    prize: item.prize ?? numberGrounded(ai.prize, evidence),
+    stipend: item.stipend ?? numberGrounded(ai.stipend, evidence),
     eligibility: item.eligibility?.length ? item.eligibility : (ai.eligibility ?? []).filter((e) => ev.includes(e.toLowerCase())),
+    tags: item.tags?.length ? item.tags : item.tags,
   };
 }
