@@ -47,7 +47,7 @@ const STOP_WORDS = new Set([
 
 export function routeSkill(message: string): AgentSkill {
   const q = message.toLowerCase();
-  if (/\b(alert|alerts|closing soon|deadline this week|deadlines this week|due this week|expiring|urgent deadlines|upcoming deadlines)\b/.test(q)) {
+  if (/\b(alert|alerts|closing soon|deadlines? (?:are )?closing|deadlines? (?:are )?due this week|deadlines? this week|expiring|urgent deadlines|upcoming deadlines)\b/.test(q)) {
     return "alerts";
   }
   if (/\b(changed|changes|update|updated|recent updates|newly added|what's new|whats new)\b/.test(q)) {
