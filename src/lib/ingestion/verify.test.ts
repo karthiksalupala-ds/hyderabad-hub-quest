@@ -151,7 +151,7 @@ describe("provider adapter parsing", () => {
         format: "greenhouse",
       },
     );
-    expect(items).toHaveLength(1);
+    assert.equal(items.length, 1);
     assert.equal(items[0]?.role, "Data Science Intern");
     assert.equal(items[0]?.applicationUrl, "https://boards.greenhouse.io/acme/jobs/123");
   });
