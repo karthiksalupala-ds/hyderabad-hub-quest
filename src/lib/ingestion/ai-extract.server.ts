@@ -13,7 +13,7 @@ export class AiStop extends Error {}
 export async function aiExtract(evidence: string): Promise<AiExtraction | null> {
   const key = process.env["OPENAI_API_KEY"];
   if (!key) return null;
-  const baseUrl = (process.env["OPENAI_BASE_URL"] ?? "https://api.openai.com/v1").replace(/\\/$/, "");
+  const baseUrl = (process.env["OPENAI_BASE_URL"] ?? "https://api.openai.com/v1").replace(/\/$/, "");
   const res = await fetch(`${baseUrl}/responses`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
@@ -21,7 +21,6 @@ export async function aiExtract(evidence: string): Promise<AiExtraction | null> 
       model: process.env["OPENAI_MODEL"] ?? "gpt-4.1-mini",
       stream: true,
       store: false,
-      reasoning: { effort: "low" },
       instructions: PROMPT,
       input: evidence.slice(0, 8000),
     }),
