@@ -201,7 +201,7 @@ export async function runAgentSkill(
   }
 
   if (skill === "verification") {
-    const mentionedUrl = message.match(/https:\/\/[^\\s<>"']+/i)?.[0]?.replace(/[),.;]+$/, null);
+    const mentionedUrl = message.match(/https:\/\/[^\s<>"']+/i)?.[0]?.replace(/[),.;]+$/, "");
     const canonicalAsked = mentionedUrl ? canonicalizeUrl(mentionedUrl) : null;
     if (!canonicalAsked && queryTerms.length === 0) {
       return {
