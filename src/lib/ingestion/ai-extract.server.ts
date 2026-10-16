@@ -11,16 +11,16 @@ export class AiStop extends Error {}
 
 /** Streams a Responses call and returns parsed JSON, or null when output is invalid. */
 export async function aiExtract(evidence: string): Promise<AiExtraction | null> {
-  const key = process.env["LOVABLE_API_KEY"];
+  const key = process.env["OPENAI_API_KEY"];
   if (!key) return null;
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+  const baseUrl = (process.env["OPENAI_BASE_URL"] ?? "https://api.openai.com/v1").replace(/\/$/, "");
+  const res = await fetch(`${baseUrl}/responses`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Lovable-API-Key": key, Authorization: `Bearer ${key}`, "X-Lovable-AIG-SDK": "fetch" },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
     body: JSON.stringify({
-      model: "openai/gpt-6-astra",
+      model: process.env["OPENAI_MODEL"] ?? "gpt-4.1-mini",
       stream: true,
       store: false,
-      reasoning: { effort: "low" },
       instructions: PROMPT,
       input: evidence.slice(0, 8000),
     }),
