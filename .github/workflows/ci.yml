@@ -27,6 +27,9 @@ jobs:
       - name: ESLint
         run: bun run lint
 
+      - name: Unit tests
+        run: bun run test
+
       - name: TypeScript check
         run: bun run typecheck
 
