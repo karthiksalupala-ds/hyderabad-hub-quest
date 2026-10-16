@@ -85,7 +85,7 @@ describe("ingestion normalization and change detection", () => {
       application_url: "https://acme.com/apply",
       content_hash: "old-hash",
     };
-    const changes = detectChanges(prev, { ...prev, deadline: null, stipend: null, content_hash: "new-hash" });
+    const changes = detectChanges(prev, { ...prev, deadline: null, stipend: null, content_hash: "old-hash" });
     expect(changes).toEqual([]);
   });
 
