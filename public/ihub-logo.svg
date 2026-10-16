@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="iHub logo">
+  <defs><linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2699ff"/><stop offset="1" stop-color="#1746c8"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffbf36"/><stop offset="1" stop-color="#ff623d"/></linearGradient></defs>
+  <rect width="128" height="128" rx="28" fill="#f8fbff"/>
+  <circle cx="64" cy="40" r="29" fill="url(#gold)"/>
+  <path d="M42 56V39h5V28h6v11h4v17zm29 0V39h4V28h6v11h5v17z" fill="#fff" opacity=".98"/>
+  <path d="M48 56V45h32v11M55 56V47h18v9" fill="none" stroke="#fff" stroke-width="3"/>
+  <path d="M24 29a10 10 0 1 1 20 0v6H24z" fill="url(#blue)"/><path d="M24 40h20v53a10 10 0 0 1-10 10h0a10 10 0 0 1-10-10z" fill="url(#blue)"/>
+  <path d="M53 34h13v22h19V34h13v69H85V68H66v35H53z" fill="#102b66"/>
+  <path d="M46 79c18-13 42-18 65-8v17c-21-11-42-5-65 7z" fill="#2389f5"/>
+  <circle cx="103" cy="27" r="5" fill="#ff9b32"/>
+</svg>
