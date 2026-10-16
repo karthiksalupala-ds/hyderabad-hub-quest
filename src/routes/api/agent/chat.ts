@@ -11,7 +11,7 @@ import {
 const RequestBody = z.object({
   message: z.string().trim().min(2).max(1200),
   profile: z.object({
-    interests: z.array(z.enum(ALL_TAGS)).max(10).default([]),
+    interests: z.array(z.string().refine((tag) => ALL_TAGS.includes(tag as (typeof ALL_TAGS)[number]))).max(10).default([]),
     locations: z.array(z.enum(["Hyderabad", "Remote", "Bengaluru", "Pune", "Chennai"])).max(5).default([]),
   }).default({ interests: [], locations: [] }),
 });
@@ -44,6 +44,8 @@ export const Route = createFileRoute("/api/agent/chat")({
           }, 503);
         }
 
+        if (!origin) return json({ error: "Same-origin request required." }, 403);
+
         const contentType = request.headers.get("content-type") ?? "";
         if (!contentType.toLowerCase().includes("application/json")) {
           return json({ error: "Send a JSON request." }, 415);
@@ -53,7 +55,9 @@ export const Route = createFileRoute("/api/agent/chat")({
         try {
           const length = Number(request.headers.get("content-length") ?? 0);
           if (length > 10_000) return json({ error: "Request body is too large." }, 413);
-          raw = await request.json();
+          const rawText = await request.text();
+          if (rawText.length > 10_000) return json({ error: "Request body is too large." }, 413);
+          raw = JSON.parse(rawText);
         } catch {
           return json({ error: "Invalid JSON body." }, 400);
         }
