@@ -6,7 +6,6 @@ import {
   Menu,
   Search,
   Settings,
-  Sparkles,
   Trophy,
   User,
 } from "lucide-react";
@@ -39,12 +38,10 @@ const NAV = [
 function Brand() {
   return (
     <Link to="/" className="flex items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-      <span className="bg-gradient-brand flex h-9 w-9 items-center justify-center rounded-xl">
-        <Sparkles className="h-5 w-5 text-primary-foreground" aria-hidden />
-      </span>
+      <img src="/ihub-logo.svg" alt="" className="h-10 w-10 rounded-xl" />
       <span className="leading-tight">
-        <span className="block font-display text-base font-semibold">Opportunity Hub</span>
-        <span className="block text-[11px] text-muted-foreground">Hyderabad · Students</span>
+        <span className="block font-display text-base font-bold tracking-tight"><span className="text-primary">i</span>Hub</span>
+        <span className="block text-[11px] text-muted-foreground">Information Hub</span>
       </span>
     </Link>
   );
