@@ -157,6 +157,6 @@ export function mergeAi(item: RawItem, ai: AiExtraction, evidence: string): RawI
     prize: item.prize ?? numberGrounded(ai.prize, evidence),
     stipend: item.stipend ?? numberGrounded(ai.stipend, evidence),
     eligibility: item.eligibility?.length ? item.eligibility : (ai.eligibility ?? []).filter((e) => ev.includes(e.toLowerCase())),
-    tags: item.tags?.length ? item.tags : item.tags,
+    tags: item.tags?.length ? item.tags : (ai.tags ?? []).filter((tag) => ev.includes(tag.toLowerCase())),
   };
 }
