@@ -46,10 +46,13 @@ const STOP_WORDS = new Set([
 
 export function routeSkill(message: string): AgentSkill {
   const q = message.toLowerCase();
+  if (/\b(alert|alerts|closing soon|deadline this week|deadlines this week|due this week|expiring|urgent deadlines|upcoming deadlines)\b/.test(q)) {
+    return "alerts";
+  }
   if (/\b(changed|changes|update|updated|recent updates|newly added|what's new|whats new)\b/.test(q)) {
     return "changes";
   }
-  if (/\b(verify|verified|verify this|official source|is this real|eligibility|eligible|deadline|application link|apply link|source link)\b/.test(q)) {
+  if (/\b(verify|verified|verify this|official source|is this real|eligibility|eligible|application link|apply link|source link)\b/.test(q)) {
     return "verification";
   }
   if (/\b(for me|match|matching|recommend|recommendation|my profile|suitable for me|fit my|based on my)\b/.test(q)) {
