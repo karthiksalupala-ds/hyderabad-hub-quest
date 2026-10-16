@@ -45,7 +45,11 @@ describe("iHub agent skill router", () => {
   });
 
   it("routes tracked updates to the changes skill", () => {
-    assert.equal(routeSkill("What changed in deadlines this week?"), "changes");
+    assert.equal(routeSkill("What changed in deadlines last month?"), "changes");
+  });
+
+  it("routes imminent deadline questions to the alerts skill", () => {
+    assert.equal(routeSkill("What deadlines are closing this week?"), "alerts");
   });
 
   it("scores configured interests and preferred locations transparently", () => {
