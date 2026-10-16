@@ -17,13 +17,13 @@ import { isOpen, matchesQuery, recommendFor, sortOpportunities } from "@/lib/fil
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Dashboard — Opportunity Hub for Hyderabad students" },
+      { title: "iHub — Information Hub for Students" },
       {
         name: "description",
         content:
           "Track Hyderabad hackathons and India internships in AI, data science and web development from one student dashboard.",
       },
-      { property: "og:title", content: "Opportunity Hub — hackathons and internships for students" },
+      { property: "og:title", content: "iHub — Information Hub for students" },
       {
         property: "og:description",
         content: "Find your next hackathon or internship, with deadlines, stipends and saved lists.",
