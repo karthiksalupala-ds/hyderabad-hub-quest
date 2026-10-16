@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Bookmark,
+  Bot,
   Cpu,
   LayoutDashboard,
   Menu,
@@ -31,6 +32,7 @@ const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/hackathons", label: "Hackathons", icon: Trophy },
   { to: "/internships", label: "Internships", icon: Cpu },
+  { to: "/assistant", label: "Ask iHub", icon: Bot },
   { to: "/saved", label: "Saved", icon: Bookmark },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
@@ -107,8 +109,8 @@ export function AppShell({
           <NavLinks />
         </div>
         <div className="rounded-xl border bg-card p-3 text-xs text-muted-foreground">
-          <p className="font-medium text-foreground">Demo dataset</p>
-          <p className="mt-1">Live integrations are not connected yet.</p>
+          <p className="font-medium text-foreground">Live data first</p>
+          <p className="mt-1">Sample records are clearly labelled. Ask iHub uses verified live listings only.</p>
         </div>
       </aside>
 

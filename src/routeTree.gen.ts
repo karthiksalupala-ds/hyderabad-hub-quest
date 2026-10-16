@@ -14,9 +14,11 @@ import { Route as HackathonsRouteImport } from './routes/hackathons'
 import { Route as InternshipsRouteImport } from './routes/internships'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as OpportunityIdRouteImport } from './routes/opportunity.$id'
 import { Route as ApiPublicIngestRouteImport } from './routes/api/public/ingest'
 import { Route as ApiPublicWebhooksApifyRouteImport } from './routes/api/public/webhooks/apify'
+import { Route as ApiAgentChatRouteImport } from './routes/api/agent/chat'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -43,6 +45,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AssistantRoute = AssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OpportunityIdRoute = OpportunityIdRouteImport.update({
   id: '/opportunity/$id',
   path: '/opportunity/$id',
@@ -58,6 +65,11 @@ const ApiPublicWebhooksApifyRoute = ApiPublicWebhooksApifyRouteImport.update({
   path: '/api/public/webhooks/apify',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAgentChatRoute = ApiAgentChatRouteImport.update({
+  id: '/api/agent/chat',
+  path: '/api/agent/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -65,9 +77,11 @@ export interface FileRoutesByFullPath {
   '/internships': typeof InternshipsRoute
   '/saved': typeof SavedRoute
   '/settings': typeof SettingsRoute
+  '/assistant': typeof AssistantRoute
   '/opportunity/$id': typeof OpportunityIdRoute
   '/api/public/ingest': typeof ApiPublicIngestRoute
   '/api/public/webhooks/apify': typeof ApiPublicWebhooksApifyRoute
+  '/api/agent/chat': typeof ApiAgentChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -75,9 +89,11 @@ export interface FileRoutesByTo {
   '/internships': typeof InternshipsRoute
   '/saved': typeof SavedRoute
   '/settings': typeof SettingsRoute
+  '/assistant': typeof AssistantRoute
   '/opportunity/$id': typeof OpportunityIdRoute
   '/api/public/ingest': typeof ApiPublicIngestRoute
   '/api/public/webhooks/apify': typeof ApiPublicWebhooksApifyRoute
+  '/api/agent/chat': typeof ApiAgentChatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -86,9 +102,11 @@ export interface FileRoutesById {
   '/internships': typeof InternshipsRoute
   '/saved': typeof SavedRoute
   '/settings': typeof SettingsRoute
+  '/assistant': typeof AssistantRoute
   '/opportunity/$id': typeof OpportunityIdRoute
   '/api/public/ingest': typeof ApiPublicIngestRoute
   '/api/public/webhooks/apify': typeof ApiPublicWebhooksApifyRoute
+  '/api/agent/chat': typeof ApiAgentChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -98,9 +116,11 @@ export interface FileRouteTypes {
     | '/internships'
     | '/saved'
     | '/settings'
+    | '/assistant'
     | '/opportunity/$id'
     | '/api/public/ingest'
     | '/api/public/webhooks/apify'
+    | '/api/agent/chat'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -108,9 +128,11 @@ export interface FileRouteTypes {
     | '/internships'
     | '/saved'
     | '/settings'
+    | '/assistant'
     | '/opportunity/$id'
     | '/api/public/ingest'
     | '/api/public/webhooks/apify'
+    | '/api/agent/chat'
   id:
     | '__root__'
     | '/'
@@ -118,9 +140,11 @@ export interface FileRouteTypes {
     | '/internships'
     | '/saved'
     | '/settings'
+    | '/assistant'
     | '/opportunity/$id'
     | '/api/public/ingest'
     | '/api/public/webhooks/apify'
+    | '/api/agent/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -129,9 +153,11 @@ export interface RootRouteChildren {
   InternshipsRoute: typeof InternshipsRoute
   SavedRoute: typeof SavedRoute
   SettingsRoute: typeof SettingsRoute
+  AssistantRoute: typeof AssistantRoute
   OpportunityIdRoute: typeof OpportunityIdRoute
   ApiPublicIngestRoute: typeof ApiPublicIngestRoute
   ApiPublicWebhooksApifyRoute: typeof ApiPublicWebhooksApifyRoute
+  ApiAgentChatRoute: typeof ApiAgentChatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -171,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/assistant': {
+      id: '/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof AssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/opportunity/$id': {
       id: '/opportunity/$id'
       path: '/opportunity/$id'
@@ -192,6 +225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhooksApifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/agent/chat': {
+      id: '/api/agent/chat'
+      path: '/api/agent/chat'
+      fullPath: '/api/agent/chat'
+      preLoaderRoute: typeof ApiAgentChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -201,9 +241,11 @@ const rootRouteChildren: RootRouteChildren = {
   InternshipsRoute: InternshipsRoute,
   SavedRoute: SavedRoute,
   SettingsRoute: SettingsRoute,
+  AssistantRoute: AssistantRoute,
   OpportunityIdRoute: OpportunityIdRoute,
   ApiPublicIngestRoute: ApiPublicIngestRoute,
   ApiPublicWebhooksApifyRoute: ApiPublicWebhooksApifyRoute,
+  ApiAgentChatRoute: ApiAgentChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

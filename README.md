@@ -98,3 +98,13 @@ The repository includes adapters and an ingestion API, but it does not discover 
 5. The Settings status button refreshes the current database view; it does not start a source crawl. After a manual or scheduled ingestion finishes, refresh the status view.
 
 If `IHUB_BASE_URL` or the GitHub `INGEST_SECRET` is missing, the scheduled workflow reports that configuration is missing and skips the HTTP request. Configured sources still need to be enabled in `source_registry`; adding credentials does not silently re-enable a source someone disabled.
+
+## Ask iHub AI assistant
+
+The `/assistant` page provides five server-side skills: opportunity discovery, stored-record verification, profile matching, recent tracked changes, and upcoming-deadline lookup. The assistant reads only active listings whose `verification_status` is `verified`; it does not treat built-in demo cards as real data.
+
+To enable AI-generated answers, configure `OPENAI_API_KEY` on the app's **server environment** (not as a `VITE_*` variable). `OPENAI_BASE_URL` and `OPENAI_MODEL` are optional. The same-origin API uses `store: false`, limits prompt/output size, and applies a best-effort per-process throttle; also configure rate limits at your hosting edge for a public deployment. The service returns a clear configuration error when the key is absent.
+
+The assistant sends only the user's current question, selected interest/location preferences, and the matching verified listing fields to the model. Conversation history is kept in the browser while the page is open and is not saved to the user's profile. Source and apply links remain visible beside returned records. Missing source fields are shown as “Not stated”; the verification skill checks stored iHub records only and does not crawl arbitrary pasted URLs.
+
+The upcoming-deadline skill lists verified records with stated deadlines in the next seven days. It does **not** send push/email notifications or schedule reminders.
