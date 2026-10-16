@@ -145,14 +145,14 @@ const INTERN_RE = /\b(intern|internship|trainee|apprentice)\b/i;
 export function parseGreenhouse(payload: unknown, cfg: CareerConfig): RawItem[] {
   const jobs = extractList(payload, "jobs") as Array<Record<string, unknown>>;
   return jobs.flatMap((j) => {
-    const title = typeof j.title === "string" ? j.title : null;
-    const url = typeof j.absolute_url === "string" ? j.absolute_url : null;
+    const title = typeof j["title"] === "string" ? j["title"] : null;
+    const url = typeof j["absolute_url"] === "string" ? j["absolute_url"] : null;
     if (!title || !url || (!cfg.includeAll && !INTERN_RE.test(title))) return [];
-    const loc = (j.location as { name?: string } | undefined)?.name ?? null;
+    const loc = (j["location"] as { name?: string } | undefined)?.name ?? null;
     return [{
       kind: "internship" as const, title, role: title, organizer: cfg.organizer, url, applicationUrl: url,
-      description: typeof j.content === "string" ? stripHtml(j.content.replace(/&lt;/g, "<").replace(/&gt;/g, ">")) : null,
-      publishedAt: toIsoDate(typeof j.updated_at === "string" ? j.updated_at : null),
+      description: typeof j["content"] === "string" ? stripHtml(j["content"].replace(/&lt;/g, "<").replace(/&gt;/g, ">")) : null,
+      publishedAt: toIsoDate(typeof j["updated_at"] === "string" ? j["updated_at"] : null),
       deadline: null, location: loc, evidence: { board: cfg.url, job: j },
     }];
   });
@@ -161,15 +161,15 @@ export function parseGreenhouse(payload: unknown, cfg: CareerConfig): RawItem[] 
 export function parseLever(payload: unknown, cfg: CareerConfig): RawItem[] {
   const jobs = extractList(payload) as Array<Record<string, unknown>>;
   return jobs.flatMap((j) => {
-    const title = typeof j.text === "string" ? j.text : null;
-    const url = typeof j.hostedUrl === "string" ? j.hostedUrl : null;
-    const cats = (j.categories ?? {}) as { location?: string; commitment?: string };
+    const title = typeof j["text"] === "string" ? j["text"] : null;
+    const url = typeof j["hostedUrl"] === "string" ? j["hostedUrl"] : null;
+    const cats = (j["categories"] ?? {}) as { location?: string; commitment?: string };
     if (!title || !url || (!cfg.includeAll && !INTERN_RE.test(`${title} ${cats.commitment ?? ""}`))) return [];
     return [{
       kind: "internship" as const, title, role: title, organizer: cfg.organizer, url,
-      applicationUrl: typeof j.applyUrl === "string" ? j.applyUrl : url,
-      description: typeof j.descriptionPlain === "string" ? j.descriptionPlain : null,
-      publishedAt: typeof j.createdAt === "number" ? toIsoDate(String(j.createdAt)) : null,
+      applicationUrl: typeof j["applyUrl"] === "string" ? j["applyUrl"] : url,
+      description: typeof j["descriptionPlain"] === "string" ? j["descriptionPlain"] : null,
+      publishedAt: typeof j["createdAt"] === "number" ? toIsoDate(String(j["createdAt"])) : null,
       deadline: null, location: cats.location ?? null, evidence: { board: cfg.url, job: j },
     }];
   });
