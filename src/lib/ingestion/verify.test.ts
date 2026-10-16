@@ -1,8 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
 import { parseFeed, parseGreenhouse, parseMcpResult } from "./adapters.server";
+import { isDue } from "./pipeline.server";
 import { canonicalizeUrl, toIsoDate } from "./normalize";
-import { detectChanges, hostAllowed, isDue, nextPollMinutes, verifyCandidate } from "./verify";
+import { detectChanges, hostAllowed, nextPollMinutes, verifyCandidate } from "./verify";
 
 describe("source-grounded verification", () => {
   const candidate = {
