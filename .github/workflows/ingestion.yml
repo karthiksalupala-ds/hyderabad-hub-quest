@@ -1,0 +1,88 @@
+name: Scheduled Opportunity Ingestion
+
+on:
+  schedule:
+    # Hourly, not minute-by-minute. Ingestion itself respects per-source due times.
+    - cron: "17 * * * *"
+  workflow_dispatch:
+    inputs:
+      source_id:
+        description: "Optional source_registry ID to run (for example: rss)"
+        required: false
+        type: string
+      force:
+        description: "Run selected enabled source(s) even if not due"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: opportunity-ingestion
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    name: Run configured opportunity sources
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check configuration
+        id: config
+        shell: bash
+        env:
+          IHUB_BASE_URL: ${{ vars.IHUB_BASE_URL }}
+          INGEST_SECRET: ${{ secrets.INGEST_SECRET }}
+        run: |
+          if [[ -z "$IHUB_BASE_URL" || -z "$INGEST_SECRET" ]]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Ingestion skipped. Configure the IHUB_BASE_URL repository variable and INGEST_SECRET repository secret."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Trigger due ingestion
+        if: steps.config.outputs.configured == 'true'
+        shell: bash
+        env:
+          IHUB_BASE_URL: ${{ vars.IHUB_BASE_URL }}
+          INGEST_SECRET: ${{ secrets.INGEST_SECRET }}
+          SOURCE_ID: ${{ inputs.source_id }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          if [[ -n "$SOURCE_ID" && ! "$SOURCE_ID" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+            echo "::error::source_id may contain only letters, numbers, underscores, and hyphens."
+            exit 1
+          fi
+
+          url="${IHUB_BASE_URL%/}/api/public/ingest"
+          query=()
+          if [[ "$FORCE" == "true" ]]; then query+=("force=1"); fi
+          if [[ -n "$SOURCE_ID" ]]; then query+=("source=$SOURCE_ID"); fi
+
+          if (( ${#query[@]} > 0 )); then
+            separator="?"
+            for item in "${query[@]}"; do
+              url="${url}${separator}${item}"
+              separator="&"
+            done
+          fi
+
+          response="$(curl --fail-with-body --silent --show-error --max-time 480 \
+            --request POST \
+            --header "x-ingest-secret: ${INGEST_SECRET}" \
+            --header "accept: application/json" \
+            "$url")"
+
+          {
+            echo "## Opportunity ingestion"
+            echo
+            echo "Triggered the ingestion endpoint successfully."
+            echo
+            echo "Result (counts/status only):"
+            echo '```json'
+            echo "$response"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
