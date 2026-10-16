@@ -193,7 +193,7 @@ function careersAdapter(src: SourceRow, envName: string): SourceAdapter {
   };
 }
 
-/* ---------------- Apify (via Lovable connector gateway) ---------------- */
+/* ---------------- Apify integration ---------------- */
 
 export const APIFY_GATEWAY = "https://connector-gateway.lovable.dev/apify";
 function apifyHeaders() {
