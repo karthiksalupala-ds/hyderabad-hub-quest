@@ -80,22 +80,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Opportunity Hub — Hackathons & Internships for Hyderabad students" },
+      { title: "iHub — Information Hub for Students" },
       {
         name: "description",
         content:
           "Discover Hyderabad offline hackathons and India-wide internships in AI, data science and web development.",
       },
-      { name: "author", content: "Opportunity Hub" },
+      { name: "author", content: "iHub" },
       { name: "theme-color", content: "#3b5bdb" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/ihub-logo.svg", type: "image/svg+xml" },
       { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/favicon.ico" },
+      { rel: "apple-touch-icon", href: "/ihub-logo.svg" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
