@@ -65,7 +65,8 @@ export function AgentStatus() {
     if (online) void load();
   }, [online]);
 
-  const enabled = stats?.sources.filter((s) => s.enabled && s.status !== "not_configured") ?? [];
+  const enabled = stats?.sources.filter((s) => s.enabled) ?? [];
+  const ready = stats?.sources.filter((s) => s.enabled && s.status === "ready") ?? [];
   const today = new Date().toISOString().slice(0, 10);
   const todayRuns = stats?.runs.filter((r) => r.started_at.slice(0, 10) === today) ?? [];
   const sum = (k: "inserted" | "updated" | "expired") => todayRuns.reduce((a, r) => a + r[k], 0);
@@ -121,8 +122,8 @@ export function AgentStatus() {
       )}
       {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
 
-      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <Stat label="Enabled sources" value={stats ? `${enabled.length}/${stats.sources.length}` : "—"} />
+      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+        <Stat label="Ready / enabled sources" value={stats ? `${ready.length}/${enabled.length}` : "—"} />
         <Stat label="New today" value={stats ? sum("inserted") : "—"} />
         <Stat label="Updated today" value={stats ? sum("updated") : "—"} />
         <Stat label="Expired today" value={stats ? sum("expired") : "—"} />
