@@ -124,13 +124,20 @@ export function scoreOpportunity(o: AgentOpportunity, profile: AgentProfile): nu
 async function loadVerifiedOpportunities(admin: Admin): Promise<AgentOpportunity[]> {
   const { data, error } = await admin
     .from("opportunities")
-    .select("id,kind,title,organizer,summary,description,source_name,source_url,application_url,location,city,mode,deadline,start_date,eligibility,tags,stipend,prize_pool,fee,last_change_at,last_change_summary,posted_at")
+    .select("id,kind,title,organizer,summary,description,source_name,source_url,application_url,location,city,mode,deadline,start_date,end_date,eligibility,tags,stipend,prize_pool,fee,last_change_at,last_change_summary,posted_at")
     .eq("status", "active")
     .eq("verification_status", "verified")
     .order("posted_at", { ascending: false, nullsFirst: false })
     .limit(200);
   if (error) throw new Error(`Could not load verified opportunities: ${error.message}`);
-  return (data ?? []).map((row) => asOpportunity(row as OpportunityRow));
+  const today = new Date().toISOString().slice(0, 10);
+  return (data ?? [])
+    .filter((row) => {
+      if (row.deadline) return row.deadline >= today;
+      if (row.kind === "hackathon" && row.end_date) return row.end_date >= today;
+      return true;
+    })
+    .map((row) => asOpportunity(row as OpportunityRow));
 }
 
 export interface SkillResult {
