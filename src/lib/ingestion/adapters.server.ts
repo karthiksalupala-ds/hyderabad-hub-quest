@@ -195,18 +195,16 @@ function careersAdapter(src: SourceRow, envName: string): SourceAdapter {
 
 /* ---------------- Apify integration ---------------- */
 
-export const APIFY_GATEWAY = "https://connector-gateway.lovable.dev/apify";
+export const APIFY_API_BASE = "https://api.apify.com/v2";
 function apifyHeaders() {
   return {
-    Authorization: `Bearer ${process.env["LOVABLE_API_KEY"]}`,
-    "X-Connection-Api-Key": process.env["APIFY_API_KEY"] ?? "",
+    Authorization: `Bearer ${process.env["APIFY_API_KEY"] ?? ""}`,
     "Content-Type": "application/json",
   };
 }
 
 export function apifyMissing(src: SourceRow): string | null {
   if (!process.env["APIFY_API_KEY"]) return `${NOT_CONFIGURED}: Apify not connected (APIFY_API_KEY)`;
-  if (!process.env["LOVABLE_API_KEY"]) return `${NOT_CONFIGURED}: LOVABLE_API_KEY missing`;
   if (!src.actor_id) return `${NOT_CONFIGURED}: actor_id not set on source`;
   if (!src.allowed_start_urls.length) return `${NOT_CONFIGURED}: allowed_start_urls not set`;
   if (!src.official_domains.length) return `${NOT_CONFIGURED}: official_domains allowlist not set`;
@@ -219,7 +217,7 @@ function mapRows(src: SourceRow, rows: unknown[]): RawItem[] {
 }
 
 export async function readApifyDataset(src: SourceRow, datasetId: string): Promise<RawItem[]> {
-  const res = await fetch(`${APIFY_GATEWAY}/datasets/${encodeURIComponent(datasetId)}/items?clean=true&limit=500`, { headers: apifyHeaders() });
+  const res = await fetch(`${APIFY_API_BASE}/datasets/${encodeURIComponent(datasetId)}/items?clean=true&limit=500`, { headers: apifyHeaders() });
   if (!res.ok) throw new Error(`Apify dataset ${datasetId} [${res.status}]: ${(await res.text()).slice(0, 300)}`);
   return mapRows(src, (await res.json()) as unknown[]);
 }
@@ -231,7 +229,7 @@ function apifyAdapter(src: SourceRow): SourceAdapter {
     missingRequirement: () => apifyMissing(src),
     allowedDomains: () => src.official_domains,
     async fetchItems() {
-      const res = await fetch(`${APIFY_GATEWAY}/acts/${encodeURIComponent(src.actor_id!)}/run-sync-get-dataset-items?timeout=240`, {
+      const res = await fetch(`${APIFY_API_BASE}/acts/${encodeURIComponent(src.actor_id!)}/run-sync-get-dataset-items?timeout=240`, {
         method: "POST",
         headers: apifyHeaders(),
         body: JSON.stringify({ startUrls: src.allowed_start_urls.map((url) => ({ url })) }),
