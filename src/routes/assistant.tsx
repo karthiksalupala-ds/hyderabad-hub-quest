@@ -167,14 +167,15 @@ function AssistantPage() {
         grounded?: boolean;
       };
       if (!response.ok) throw new Error(payload.error ?? "iHub could not answer that yet.");
-      setMessages((previous) => [...previous, {
+      const reply: Message = {
         id: `assistant-${Date.now()}`,
         role: "assistant",
         text: payload.answer ?? "No answer returned.",
-        skill: payload.skill,
         opportunities: payload.opportunities ?? [],
-        grounded: payload.grounded,
-      }]);
+        ...(payload.skill ? { skill: payload.skill } : {}),
+        ...(payload.grounded !== undefined ? { grounded: payload.grounded } : {}),
+      };
+      setMessages((previous) => [...previous, reply]);
     } catch (error) {
       setMessages((previous) => [...previous, {
         id: `error-${Date.now()}`,
@@ -257,7 +258,6 @@ function AssistantPage() {
                 onChange={(event) => setQuestion(event.target.value)}
                 placeholder="Ask about internships, hackathons, eligibility, deadlines…"
                 rows={2}
-                maxRows={5}
                 maxLength={1200}
                 disabled={pending}
                 className="min-h-16 resize-y"
