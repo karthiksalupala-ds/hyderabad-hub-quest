@@ -1,4 +1,5 @@
-import { describe, expect, test } from "bun:test";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 
 import { parseFeed, parseGreenhouse, parseMcpResult } from "./adapters.server";
 import { isDue } from "./pipeline.server";
@@ -21,61 +22,59 @@ describe("source-grounded verification", () => {
     evidence: { pageTitle: "Data Science Intern", source: "Acme careers page" },
   };
 
-  test("verifies complete source-backed internship facts on an allowed domain", () => {
-    expect(verifyCandidate(candidate, ["acme.com"]).status).toBe("verified");
+  it("verifies complete source-backed internship facts on an allowed domain", () => {
+    assert.equal(verifyCandidate(candidate, ["acme.com"]).status, "verified");
   });
 
-  test("keeps records needing review when source evidence is absent", () => {
-    expect(verifyCandidate({ ...candidate, evidence: null }, ["acme.com"]).status).toBe("needs_verification");
+  it("keeps records needing review when source evidence is absent", () => {
+    assert.equal(verifyCandidate({ ...candidate, evidence: null }, ["acme.com"]).status, "needs_verification");
   });
 
-  test("rejects placeholder listing URLs", () => {
+  it("rejects placeholder listing URLs", () => {
     const result = verifyCandidate(
       { ...candidate, url: "https://example.com/demo/data-science-intern" },
       ["example.com"],
     );
-    expect(result.status).toBe("rejected");
-    expect(result.reasons).toContain("placeholder/test URL");
+    assert.equal(result.status, "rejected");
+    assert.ok(result.reasons.includes("placeholder/test URL"));
   });
 
-  test("does not accept lookalike domains as allowlisted subdomains", () => {
-    expect(hostAllowed("https://jobs.acme.com/role", ["acme.com"])).toBe(true);
-    expect(hostAllowed("https://acme.com.attacker.test/role", ["acme.com"])).toBe(false);
+  it("does not accept lookalike domains as allowlisted subdomains", () => {
+    assert.equal(hostAllowed("https://jobs.acme.com/role", ["acme.com"]), true);
+    assert.equal(hostAllowed("https://acme.com.attacker.test/role", ["acme.com"]), false);
   });
 });
 
 describe("adaptive source scheduling", () => {
-  test("never polls more frequently than hourly and backs off after empty runs", () => {
-    expect(nextPollMinutes(15, 0)).toBe(60);
-    expect(nextPollMinutes(360, 1)).toBe(720);
-    expect(nextPollMinutes(360, 6)).toBe(10080);
-    expect(nextPollMinutes(360, 10)).toBe(10080);
+  it("never polls more frequently than hourly and backs off after empty runs", () => {
+    assert.equal(nextPollMinutes(15, 0), 60);
+    assert.equal(nextPollMinutes(360, 1), 720);
+    assert.equal(nextPollMinutes(360, 6), 10080);
+    assert.equal(nextPollMinutes(360, 10), 10080);
   });
 
-  test("honours next_run_at and the one-hour safety floor", () => {
+  it("honours next_run_at and the one-hour safety floor", () => {
     const source = {
       last_run_at: "2026-10-16T10:00:00.000Z",
       next_run_at: "2026-10-16T10:30:00.000Z",
       poll_interval_minutes: 360,
     };
-    expect(isDue(source, Date.parse("2026-10-16T10:45:00.000Z"))).toBe(false);
-    expect(isDue(source, Date.parse("2026-10-16T11:00:00.000Z"))).toBe(true);
+    assert.equal(isDue(source, Date.parse("2026-10-16T10:45:00.000Z")), false);
+    assert.equal(isDue(source, Date.parse("2026-10-16T11:00:00.000Z")), true);
   });
 });
 
 describe("ingestion normalization and change detection", () => {
-  test("canonicalizes tracking links for stable deduplication", () => {
-    expect(canonicalizeUrl("https://WWW.Acme.com/job/1?utm_source=newsletter&b=2&a=1#apply")).toBe(
-      "https://acme.com/job/1?a=1&b=2",
-    );
+  it("canonicalizes tracking links for stable deduplication", () => {
+    assert.equal(canonicalizeUrl("https://WWW.Acme.com/job/1?utm_source=newsletter&b=2&a=1#apply"), "https://acme.com/job/1?a=1&b=2");
   });
 
-  test("parses unambiguous dates and leaves ambiguous numeric dates unset", () => {
-    expect(toIsoDate("16 Oct 2026")).toBe("2026-10-16");
-    expect(toIsoDate("03/04/2026")).toBe(null);
+  it("parses unambiguous dates and leaves ambiguous numeric dates unset", () => {
+    assert.equal(toIsoDate("16 Oct 2026"), "2026-10-16");
+    assert.equal(toIsoDate("03/04/2026"), null);
   });
 
-  test("does not mark a field as changed when the new source omitted it", () => {
+  it("does not mark a field as changed when the new source omitted it", () => {
     const prev = {
       deadline: "2026-11-01",
       location: "Hyderabad",
@@ -87,10 +86,10 @@ describe("ingestion normalization and change detection", () => {
       content_hash: "old-hash",
     };
     const changes = detectChanges(prev, { ...prev, deadline: null, stipend: null, content_hash: "old-hash" });
-    expect(changes).toEqual([]);
+    assert.deepEqual(changes, []);
   });
 
-  test("detects explicit deadline changes", () => {
+  it("detects explicit deadline changes", () => {
     const prev = {
       deadline: "2026-11-01",
       location: "Hyderabad",
@@ -102,12 +101,12 @@ describe("ingestion normalization and change detection", () => {
       content_hash: "same",
     };
     const changes = detectChanges(prev, { ...prev, deadline: "2026-11-15" });
-    expect(changes.map((change) => change.change_type)).toEqual(["deadline_changed"]);
+    assert.deepEqual(changes.map((change) => change.change_type), ["deadline_changed"]);
   });
 });
 
 describe("provider adapter parsing", () => {
-  test("parses an RSS item without inventing an application deadline", () => {
+  it("parses an RSS item without inventing an application deadline", () => {
     const xml = `<?xml version="1.0"?>
       <rss><channel><title>Example Events</title>
         <item>
@@ -122,13 +121,13 @@ describe("provider adapter parsing", () => {
       kind: "hackathon",
       organizer: "Example Events",
     });
-    expect(items).toHaveLength(1);
-    expect(items[0]?.title).toBe("Student Data Challenge");
-    expect(items[0]?.deadline).toBe(null);
-    expect(items[0]?.organizer).toBe("Example Events");
+    assert.equal(items.length, 1);
+    assert.equal(items[0]?.title, "Student Data Challenge");
+    assert.equal(items[0]?.deadline, null);
+    assert.equal(items[0]?.organizer, "Example Events");
   });
 
-  test("maps only internship roles from a Greenhouse feed by default", () => {
+  it("maps only internship roles from a Greenhouse feed by default", () => {
     const items = parseGreenhouse(
       {
         jobs: [
@@ -153,14 +152,12 @@ describe("provider adapter parsing", () => {
       },
     );
     expect(items).toHaveLength(1);
-    expect(items[0]?.role).toBe("Data Science Intern");
-    expect(items[0]?.applicationUrl).toBe("https://boards.greenhouse.io/acme/jobs/123");
+    assert.equal(items[0]?.role, "Data Science Intern");
+    assert.equal(items[0]?.applicationUrl, "https://boards.greenhouse.io/acme/jobs/123");
   });
 
-  test("returns structured MCP tool items and ignores tool errors", () => {
-    expect(parseMcpResult({ result: { structuredContent: { items: [{ title: "Intern" }] } } }, "items")).toEqual([
-      { title: "Intern" },
-    ]);
-    expect(parseMcpResult({ result: { isError: true, structuredContent: { items: [{ title: "Fake" }] } } }, "items")).toEqual([]);
+  it("returns structured MCP tool items and ignores tool errors", () => {
+    assert.deepEqual(parseMcpResult({ result: { structuredContent: { items: [{ title: "Intern" }] } } }, "items"), [{ title: "Intern" }]);
+    assert.deepEqual(parseMcpResult({ result: { isError: true, structuredContent: { items: [{ title: "Fake" }] } } }, "items"), []);
   });
 });
