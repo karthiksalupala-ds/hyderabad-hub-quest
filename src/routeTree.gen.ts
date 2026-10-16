@@ -89,9 +89,11 @@ export interface FileRoutesByTo {
   '/internships': typeof InternshipsRoute
   '/saved': typeof SavedRoute
   '/settings': typeof SettingsRoute
+  '/assistant': typeof AssistantRoute
   '/opportunity/$id': typeof OpportunityIdRoute
   '/api/public/ingest': typeof ApiPublicIngestRoute
   '/api/public/webhooks/apify': typeof ApiPublicWebhooksApifyRoute
+  '/api/agent/chat': typeof ApiAgentChatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -100,9 +102,11 @@ export interface FileRoutesById {
   '/internships': typeof InternshipsRoute
   '/saved': typeof SavedRoute
   '/settings': typeof SettingsRoute
+  '/assistant': typeof AssistantRoute
   '/opportunity/$id': typeof OpportunityIdRoute
   '/api/public/ingest': typeof ApiPublicIngestRoute
   '/api/public/webhooks/apify': typeof ApiPublicWebhooksApifyRoute
+  '/api/agent/chat': typeof ApiAgentChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -124,9 +128,11 @@ export interface FileRouteTypes {
     | '/internships'
     | '/saved'
     | '/settings'
+    | '/assistant'
     | '/opportunity/$id'
     | '/api/public/ingest'
     | '/api/public/webhooks/apify'
+    | '/api/agent/chat'
   id:
     | '__root__'
     | '/'
@@ -134,9 +140,11 @@ export interface FileRouteTypes {
     | '/internships'
     | '/saved'
     | '/settings'
+    | '/assistant'
     | '/opportunity/$id'
     | '/api/public/ingest'
     | '/api/public/webhooks/apify'
+    | '/api/agent/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
