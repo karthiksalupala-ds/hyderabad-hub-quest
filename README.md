@@ -86,3 +86,15 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Real-data ingestion setup
+
+The repository includes adapters and an ingestion API, but it does not discover live opportunities until permitted sources and deployment credentials are configured.
+
+1. Configure the app's server-side environment on the deployment host: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and a long random `INGEST_SECRET`. Keep service-role keys and ingestion secrets server-side; never put them in `VITE_*` variables.
+2. In GitHub repository **Settings → Secrets and variables → Actions**, add the repository variable `IHUB_BASE_URL` (the deployed app's base URL, without a trailing slash) and secret `INGEST_SECRET`. The secret value must match the deployed app's `INGEST_SECRET`.
+3. Configure permitted source feeds/connectors in the deployment environment (`INGEST_FEEDS`, `COLLEGE_FEEDS`, `CAREER_FEEDS`, `REST_SOURCES`, `WEBMCP_TOOLS`, or `APIFY_API_KEY` and the relevant source registry fields). Enable only sources you intend to run. Some platforms require partner/approved API access; the adapter router intentionally does not scrape sources that do not permit it.
+4. The **Scheduled Opportunity Ingestion** GitHub Actions workflow runs hourly and the pipeline processes only enabled, due sources. Use **Actions → Scheduled Opportunity Ingestion → Run workflow** for an on-demand run; optionally set `source_id` and `force`. Even forced runs skip disabled sources.
+5. The Settings status button refreshes the current database view; it does not start a source crawl. After a manual or scheduled ingestion finishes, refresh the status view.
+
+If `IHUB_BASE_URL` or the GitHub `INGEST_SECRET` is missing, the scheduled workflow reports that configuration is missing and skips the HTTP request. Configured sources still need to be enabled in `source_registry`; adding credentials does not silently re-enable a source someone disabled.

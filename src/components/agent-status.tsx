@@ -16,8 +16,8 @@ interface Stats {
   sources: Source[];
   runs: Run[];
   verified: number;
-  unverified: number;
-  failed: number;
+  needsVerification: number;
+  failedOrRejected: number;
 }
 
 function Stat({ label, value }: { label: string; value: string | number }) {
@@ -36,27 +36,37 @@ export function AgentStatus() {
 
   const load = async () => {
     setError(null);
-    const count = (v: string) =>
-      supabase.from("opportunities").select("id", { count: "exact", head: true }).eq("status", "active").eq("verification_status", v);
-    const [s, r, v, u, f] = await Promise.all([
+    const [s, r, counts] = await Promise.all([
       supabase.from("source_registry").select("*").order("name"),
       supabase.from("ingestion_runs").select("*").order("started_at", { ascending: false }).limit(50),
-      count("verified"),
-      count("unverified"),
-      count("failed"),
+      // This aggregate function is SECURITY DEFINER and returns counts only, so
+      // status totals remain accurate despite the public row policy hiding unverified listings.
+      supabase.rpc("opportunity_counts"),
     ]);
-    if (s.error || r.error) {
+    if (s.error || r.error || counts.error) {
       setError("Could not reach the live database. Showing cached state.");
       return;
     }
-    setStats({ sources: s.data, runs: r.data, verified: v.count ?? 0, unverified: u.count ?? 0, failed: f.count ?? 0 });
+    const activeCounts = counts.data.filter((row) => row.status === "active");
+    const totalFor = (statuses: string[]) =>
+      activeCounts
+        .filter((row) => statuses.includes(row.verification_status))
+        .reduce((total, row) => total + row.n, 0);
+    setStats({
+      sources: s.data,
+      runs: r.data,
+      verified: totalFor(["verified"]),
+      needsVerification: totalFor(["unverified", "needs_verification"]),
+      failedOrRejected: totalFor(["failed", "rejected"]),
+    });
   };
 
   useEffect(() => {
     if (online) void load();
   }, [online]);
 
-  const enabled = stats?.sources.filter((s) => s.enabled && s.status !== "not_configured") ?? [];
+  const enabled = stats?.sources.filter((s) => s.enabled) ?? [];
+  const ready = stats?.sources.filter((s) => s.enabled && s.status === "ready") ?? [];
   const today = new Date().toISOString().slice(0, 10);
   const todayRuns = stats?.runs.filter((r) => r.started_at.slice(0, 10) === today) ?? [];
   const sum = (k: "inserted" | "updated" | "expired") => todayRuns.reduce((a, r) => a + r[k], 0);
@@ -80,9 +90,14 @@ export function AgentStatus() {
             void load();
           }}
         >
-          <RefreshCw className="h-4 w-4" aria-hidden /> Check now
+          <RefreshCw className="h-4 w-4" aria-hidden /> Refresh status
         </Button>
       </div>
+
+      <p className="text-xs text-muted-foreground">
+        Refresh status reloads the current database view. Source ingestion runs on its schedule; use the
+        “Scheduled Opportunity Ingestion” workflow in GitHub Actions for an on-demand run.
+      </p>
 
       <div className="flex flex-wrap gap-2">
         {isLive ? (
@@ -107,13 +122,14 @@ export function AgentStatus() {
       )}
       {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
 
-      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <Stat label="Active sources" value={stats ? `${enabled.length}/${stats.sources.length}` : "—"} />
+      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+        <Stat label="Ready / enabled sources" value={stats ? `${ready.length}/${enabled.length}` : "—"} />
         <Stat label="New today" value={stats ? sum("inserted") : "—"} />
         <Stat label="Updated today" value={stats ? sum("updated") : "—"} />
         <Stat label="Expired today" value={stats ? sum("expired") : "—"} />
         <Stat label="Verified" value={stats?.verified ?? "—"} />
-        <Stat label="Unverified / failed" value={stats ? `${stats.unverified} / ${stats.failed}` : "—"} />
+        <Stat label="Needs verification" value={stats?.needsVerification ?? "—"} />
+        <Stat label="Failed / rejected" value={stats?.failedOrRejected ?? "—"} />
       </div>
       <p className="text-xs text-muted-foreground">
         Last successful import: {lastSuccess ? formatDateTime(lastSuccess.finished_at ?? lastSuccess.started_at) : "none yet"}

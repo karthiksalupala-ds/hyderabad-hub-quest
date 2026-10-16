@@ -12,8 +12,21 @@ export const Route = createFileRoute("/api/public/webhooks/apify")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: src } = await supabaseAdmin.from("source_registry").select("*").eq("id", sourceId).eq("kind", "apify").maybeSingle();
         const ds = body?.resource?.defaultDatasetId;
-        if (!src || !ds || body?.resource?.status !== "SUCCEEDED") {
-          await supabaseAdmin.from("ingestion_events").insert({ source_id: src?.id ?? null, event_type: body?.eventType ?? "unknown", external_run_id: body?.resource?.id ?? null, status: "rejected", error: "unknown source, missing dataset or run not succeeded" });
+        if (!src || !src.enabled || !ds || body?.resource?.status !== "SUCCEEDED") {
+          const reason = !src
+            ? "unknown source"
+            : !src.enabled
+              ? "source is disabled"
+              : !ds
+                ? "missing dataset"
+                : "run not succeeded";
+          await supabaseAdmin.from("ingestion_events").insert({
+            source_id: src?.id ?? null,
+            event_type: body?.eventType ?? "unknown",
+            external_run_id: body?.resource?.id ?? null,
+            status: "rejected",
+            error: reason,
+          });
           return new Response("Ignored", { status: 202 });
         }
         const { apifyMissing, readApifyDataset } = await import("@/lib/ingestion/adapters.server");

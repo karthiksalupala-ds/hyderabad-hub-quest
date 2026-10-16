@@ -130,7 +130,7 @@ export async function processItems(admin: Admin, src: SourceRow, rawItems: RawIt
     error: errors[0] ?? null,
   }).eq("id", run.id);
   await admin.from("source_registry").update({
-    status: "ready", enabled: true, requirement: null, last_run_at: fin, last_success_at: fin, last_error: null,
+    status: "ready", requirement: null, last_run_at: fin, last_success_at: fin, last_error: null,
     last_counts: { ...c, expired, ai_used: ai.used }, consecutive_empty_runs: empty,
     next_run_at: new Date(Date.now() + nextPollMinutes(src.poll_interval_minutes, empty) * 60_000).toISOString(),
   }).eq("id", src.id);
@@ -148,11 +148,15 @@ export async function expireListings(admin: Admin, runId?: string) {
 }
 
 export async function runSource(admin: Admin, src: SourceRow, opts: RunOptions) {
+  if (!src.enabled) return { status: "disabled" as const };
+
   const a = adapterFor(src);
   const missing = a.missingRequirement();
   if (missing) {
+    // Keep the operator's enabled/disabled choice intact. Adding missing credentials
+    // or feed configuration should not require re-enabling the source in the database.
     await admin.from("source_registry").update({
-      enabled: false, status: src.status === "disabled" ? "disabled" : "not_configured", requirement: missing,
+      status: "not_configured", requirement: missing,
     }).eq("id", src.id);
     return { status: "NOT_CONFIGURED" as const, reason: missing };
   }
@@ -184,6 +188,8 @@ export async function runIngestion(admin: Admin, opts: { force?: boolean; source
   const out: Record<string, unknown> = {};
   const hour = new Date().toISOString().slice(0, 13);
   for (const s of sources ?? []) {
+    // An explicit disable always wins, including forced/manual runs.
+    if (!s.enabled) { out[s.id] = { status: "disabled" }; continue; }
     if (!opts.force && !isDue(s)) { out[s.id] = { status: "not_due", next_run_at: s.next_run_at }; continue; }
     const trigger = opts.trigger ?? (opts.force ? "manual" : "poll");
     // Polls are idempotent per source per hour; manual runs get their own key.
