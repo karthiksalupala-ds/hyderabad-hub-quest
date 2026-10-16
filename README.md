@@ -1,6 +1,6 @@
-# Hyderabad Hub Quest
+# iHub — Information Hub
 
-Build a polished, production-ready student opportunities web app called "Hyderabad Opportunity Hub".
+Build a polished, production-ready student opportunities web app called "iHub — Information Hub".
 
 CORE IDEA:
 A student-focused dashboard that helps B.Tech students discover and track:
@@ -21,7 +21,7 @@ IMPORTANT PRODUCT BEHAVIOR:
 
 PAGES:
 1. Dashboard/Home
-   - Header: logo "Opportunity Hub", search, saved count, profile menu
+   - Header: logo "iHub", search, saved count, profile menu
    - Hero: "Find your next hackathon or internship"
    - Two large category cards: Hackathons and Internships
    - KPI cards: Open Opportunities, Deadlines This Week, Hyderabad Offline, Remote Internships
