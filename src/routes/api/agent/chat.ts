@@ -19,10 +19,46 @@ const RequestBody = z.object({
 const json = (body: unknown, status = 200) =>
   Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 
+// Best-effort per-process throttle to limit accidental token spend. Production
+// deployments should also configure edge/platform rate limiting.
+const RATE_WINDOW_MS = 10 * 60 * 1000;
+const RATE_MAX = 12;
+const rateBuckets = new Map<string, { start: number; count: number }>();
+
+function requestIdentity(request: Request): string {
+  const address =
+    request.headers.get("cf-connecting-ip") ??
+    request.headers.get("x-real-ip") ??
+    request.headers.get("x-forwarded-for")?.split(",").map((part) => part.trim()).filter(Boolean).at(-1);
+  return address || "unknown";
+}
+
+function isRateLimited(request: Request): boolean {
+  const now = Date.now();
+  const identity = requestIdentity(request);
+  const current = rateBuckets.get(identity);
+  if (!current || now - current.start >= RATE_WINDOW_MS) {
+    rateBuckets.set(identity, { start: now, count: 1 });
+  } else {
+    if (current.count >= RATE_MAX) return true;
+    current.count += 1;
+  }
+  if (rateBuckets.size > 5000) {
+    for (const [key, value] of rateBuckets) {
+      if (now - value.start >= RATE_WINDOW_MS) rateBuckets.delete(key);
+    }
+  }
+  return false;
+}
+
 export const Route = createFileRoute("/api/agent/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        if (isRateLimited(request)) {
+          return json({ error: "Too many iHub AI requests from this connection. Please wait a few minutes and try again.", code: "RATE_LIMITED" }, 429);
+        }
+
         // The UI is same-origin. Reject cross-site browser requests to reduce
         // accidental third-party use of the server-side model key.
         const origin = request.headers.get("origin");
