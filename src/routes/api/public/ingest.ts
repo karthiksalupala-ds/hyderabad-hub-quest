@@ -9,7 +9,8 @@ export const Route = createFileRoute("/api/public/ingest")({
         const force = new URL(request.url).searchParams.get("force") === "1";
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { runIngestion } = await import("@/lib/ingestion/pipeline.server");
-        return Response.json(await runIngestion(supabaseAdmin, { force, sourceId: new URL(request.url).searchParams.get("source") ?? undefined }));
+        const sourceId = new URL(request.url).searchParams.get("source");
+        return Response.json(await runIngestion(supabaseAdmin, { force, ...(sourceId ? { sourceId } : {}) }));
       },
     },
   },
