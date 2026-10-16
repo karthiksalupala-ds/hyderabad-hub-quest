@@ -32,7 +32,7 @@ type AgentOpportunity = {
   lastChangeSummary: string | null;
 };
 
-type Skill = "discovery" | "verification" | "matching" | "changes";
+type Skill = "discovery" | "verification" | "matching" | "changes" | "alerts";
 type Message = {
   id: string;
   role: "user" | "assistant";
@@ -46,7 +46,8 @@ const PROMPTS = [
   "Find AI and data science internships in Hyderabad",
   "Recommend opportunities for my profile",
   "Show recent deadline or stipend changes",
-  "Verify this opportunity's eligibility and apply link",
+  "Show source and eligibility for data science internships",
+  "What deadlines are closing this week?",
 ];
 
 const SKILL_LABEL: Record<Skill, string> = {
@@ -54,6 +55,7 @@ const SKILL_LABEL: Record<Skill, string> = {
   verification: "Source verification",
   matching: "Personalized matching",
   changes: "Recent changes",
+  alerts: "Upcoming deadlines",
 };
 
 export const Route = createFileRoute("/assistant")({
