@@ -1,5 +1,5 @@
 import js from "@eslint/js";
-import eslintPluginPrettier from "eslint-plugin-prettier/recommended";
+import eslintConfigPrettier from "eslint-config-prettier/flat";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
@@ -36,5 +36,6 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
     },
   },
-  eslintPluginPrettier,
+  // Keep formatting separate from lint; use the existing Prettier format script for style.
+  eslintConfigPrettier,
 );
