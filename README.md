@@ -115,3 +115,14 @@ The upcoming-deadline skill lists verified records with stated deadlines in the 
 - [`SKILLS.md`](./SKILLS.md) — current skill catalogue, routing behavior, examples, matching score, boundaries, and instructions for adding a skill.
 
 These files describe the **student-facing iHub AI assistant**, not a coding agent. Treat `skills.server.ts` as the executable implementation and keep the docs/tests aligned with code changes.
+
+## AI coding-agent setup
+
+This repository includes dedicated instructions and reusable skills for AI coding agents. These are separate from the student-facing runtime assistant documented in `AGENT.md` and `SKILLS.md`.
+
+- [`AGENTS.md`](./AGENTS.md) — shared repository rules for Codex and compatible coding agents.
+- [`CLAUDE.md`](./CLAUDE.md) — Claude Code entry point; directs the agent to shared rules and matching skills.
+- [`.github/copilot-instructions.md`](./.github/copilot-instructions.md) — GitHub Copilot repository custom instructions.
+- Reusable skills are mirrored in `.agents/skills/`, `.github/skills/`, and `.claude/skills/` for repository validation, ingestion engineering, and runtime-agent development.
+
+The skill directories follow the `SKILL.md` format. When modifying a skill, update all mirrored copies and keep the executable code, tests, and runtime documentation aligned.
