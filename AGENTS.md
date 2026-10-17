@@ -10,7 +10,7 @@ These instructions are for AI coding agents working in this repository (for exam
    - Any code change, review, or CI failure: `.agents/skills/repo-change-validation/SKILL.md`
    - `src/lib/ingestion/**`, source adapters, ingestion routes, or the scheduled ingestion workflow: `.agents/skills/ihub-ingestion/SKILL.md`
    - `src/lib/agent/**`, `src/routes/assistant.tsx`, or `src/routes/api/agent/**`: `.agents/skills/ihub-runtime-agent/SKILL.md`
-4. For GitHub Copilot, matching copies are under `.github/skills/`; keep both locations in sync when editing a skill.
+4. The open `SKILL.md` format is mirrored under `.agents/skills/` (Codex and compatible agents), `.github/skills/` (GitHub Copilot), and `.claude/skills/` (Claude Code). Keep all three copies in sync when editing a skill.
 
 ## Project map
 
