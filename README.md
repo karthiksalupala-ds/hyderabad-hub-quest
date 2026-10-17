@@ -108,3 +108,10 @@ To enable AI-generated answers, configure `OPENAI_API_KEY` on the app's **server
 The assistant sends only the user's current question, selected interest/location preferences, and the matching verified listing fields to the model. Conversation history is kept in the browser while the page is open and is not saved to the user's profile. Source and apply links remain visible beside returned records. Missing source fields are shown as “Not stated”; the verification skill checks stored iHub records only and does not crawl arbitrary pasted URLs.
 
 The upcoming-deadline skill lists verified records with stated deadlines in the next seven days. It does **not** send push/email notifications or schedule reminders.
+
+### Agent documentation
+
+- [`AGENT.md`](./AGENT.md) — runtime agent architecture, safety/evidence rules, privacy, configuration and limitations.
+- [`SKILLS.md`](./SKILLS.md) — current skill catalogue, routing behavior, examples, matching score, boundaries, and instructions for adding a skill.
+
+These files describe the **student-facing iHub AI assistant**, not a coding agent. Treat `skills.server.ts` as the executable implementation and keep the docs/tests aligned with code changes.
