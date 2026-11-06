@@ -1,3 +1,4 @@
+import { getAiProviderConfig } from "@/lib/ai/provider-config.server";
 import { parseAiExtraction, type AiExtraction } from "./mapping";
 
 const PROMPT = `You extract structured facts about ONE hackathon or internship from source text.
@@ -11,14 +12,13 @@ export class AiStop extends Error {}
 
 /** Streams a Responses call and returns parsed JSON, or null when output is invalid. */
 export async function aiExtract(evidence: string): Promise<AiExtraction | null> {
-  const key = process.env["OPENAI_API_KEY"];
-  if (!key) return null;
-  const baseUrl = (process.env["OPENAI_BASE_URL"] ?? "https://api.openai.com/v1").replace(/\/$/, "");
-  const res = await fetch(`${baseUrl}/responses`, {
+  const provider = getAiProviderConfig();
+  if (!provider) return null;
+  const res = await fetch(`${provider.baseUrl}/responses`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${provider.apiKey}` },
     body: JSON.stringify({
-      model: process.env["OPENAI_MODEL"] ?? "gpt-4.1-mini",
+      model: provider.model,
       stream: true,
       store: false,
       instructions: PROMPT,
