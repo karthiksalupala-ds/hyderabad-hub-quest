@@ -45,7 +45,7 @@ Implementation entry points:
 
 ### Privacy and model use
 
-- Keep `OPENAI_API_KEY` on the server. Never introduce it into a `VITE_*` environment variable or browser bundle.
+- Keep `OPENROUTER_API_KEY` and the optional `OPENAI_API_KEY` fallback on the server. Never introduce either key into a `VITE_*` environment variable or browser bundle.
 - The Responses API request uses `store: false` and a bounded output budget.
 - The current page keeps the conversation in browser memory only; it is not persisted to the iHub profile or database by this implementation.
 - The current throttle is a **best-effort, per-process** limit. Configure edge/hosting rate limits for a public deployment; in-memory limits are not a distributed quota.
@@ -67,11 +67,14 @@ Server-side deployment variables:
 
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
-- `OPENAI_API_KEY` (required to produce AI-generated answers)
-- `OPENAI_BASE_URL` (optional; defaults to the OpenAI API base URL)
-- `OPENAI_MODEL` (optional; defaults to `gpt-4.1-mini`)
+- `OPENROUTER_API_KEY` (recommended; preferred when present)
+- `OPENROUTER_BASE_URL` (optional; defaults to `https://openrouter.ai/api/v1`)
+- `OPENROUTER_MODEL` (optional; defaults to `openrouter/free`)
+- `OPENAI_API_KEY` (optional fallback, used only when the OpenRouter key is absent)
+- `OPENAI_BASE_URL` (optional fallback base URL; defaults to the OpenAI API base URL)
+- `OPENAI_MODEL` (optional fallback model; defaults to `gpt-4.1-mini`)
 
-The Supabase publishable key may be available to the frontend, but the service-role key and OpenAI key must remain server-side. Configure permitted source adapters separately as described in the [README](./README.md).
+The Supabase publishable key may be available to the frontend, but the service-role key and all AI provider keys must remain server-side. Configure permitted source adapters separately as described in the [README](./README.md).
 
 ## Explicit non-capabilities today
 
