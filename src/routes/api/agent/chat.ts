@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { ALL_TAGS } from "@/lib/types";
+import { getAiProviderConfig } from "@/lib/ai/provider-config.server";
 import {
   buildAgentInstructions,
   extractResponseText,
@@ -72,10 +73,10 @@ export const Route = createFileRoute("/api/agent/chat")({
           }
         }
 
-        const key = process.env["OPENAI_API_KEY"];
-        if (!key) {
+        const provider = getAiProviderConfig();
+        if (!provider) {
           return json({
-            error: "The iHub AI service is not configured yet. Add OPENAI_API_KEY to the server environment; no key is needed in the browser.",
+            error: "The iHub AI service is not configured yet. Add OPENROUTER_API_KEY (recommended) or OPENAI_API_KEY to the server environment; no key is needed in the browser.",
             code: "AI_NOT_CONFIGURED",
           }, 503);
         }
@@ -118,18 +119,16 @@ export const Route = createFileRoute("/api/agent/chat")({
             });
           }
 
-          const baseUrl = (process.env["OPENAI_BASE_URL"] ?? "https://api.openai.com/v1").replace(/\/$/, "");
-          const model = process.env["OPENAI_MODEL"] ?? "gpt-4.1-mini";
           const evidence = formatAgentEvidence(skillResult);
-          const response = await fetch(`${baseUrl}/responses`, {
+          const response = await fetch(`${provider.baseUrl}/responses`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${key}`,
+              Authorization: `Bearer ${provider.apiKey}`,
             },
             signal: AbortSignal.timeout(20_000),
             body: JSON.stringify({
-              model,
+              model: provider.model,
               store: false,
               max_output_tokens: 650,
               instructions: buildAgentInstructions(skillResult.skill, skillResult.context),
