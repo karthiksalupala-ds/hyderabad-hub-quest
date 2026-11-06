@@ -12,7 +12,7 @@ export interface AiProviderConfig {
 type Environment = Readonly<Record<string, string | undefined>>;
 
 function baseUrl(value: string | undefined, fallback: string): string {
-  return (value?.trim() || fallback).replace(/\\/+$/, "");
+  return (value?.trim() || fallback).replace(/\/+$/, "");
 }
 
 export function getAiProviderConfig(env: Environment = process.env): AiProviderConfig | null {
