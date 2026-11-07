@@ -40,13 +40,6 @@ export function PushNotificationControl() {
           setPending(false);
           setError(null);
           break;
-        case "push:open": {
-          const path = (message as NativeMessage & { url?: unknown }).url;
-          if (typeof path === "string" && path.startsWith("/") && !path.startsWith("//")) {
-            window.location.assign(path);
-          }
-          break;
-        }
         case "push:denied":
         case "push:error":
           setPending(false);
