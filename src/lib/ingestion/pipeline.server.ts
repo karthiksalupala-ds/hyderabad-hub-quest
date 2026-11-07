@@ -5,6 +5,7 @@
 import { adapterFor, type RawItem, type SourceRow } from "./adapters.server";
 import { AiStop, aiExtract } from "./ai-extract.server";
 import { sendNewOpportunityPush, type NewOpportunityPush } from "@/lib/push/fcm.server";
+import { getAiProviderConfig } from "@/lib/ai/provider-config.server";
 import { mergeAi } from "./mapping";
 import { canonicalizeUrl, contentHash, deriveTags, detectCity, detectMode, normalizeOrganizer, normalizeText } from "./normalize";
 import { detectChanges, isExpired, isSameOpportunity, MIN_POLL_MINUTES, nextPollMinutes, verifyCandidate } from "./verify";
@@ -21,7 +22,7 @@ function needsAi(it: RawItem): boolean {
 
 /** Bounded, optional AI stage. Disabled with INGEST_AI_ENABLED=0; max items via INGEST_AI_MAX (default 5, cap 25). */
 export async function aiStage(items: RawItem[]): Promise<{ items: RawItem[]; used: number; note: string | null }> {
-  if (process.env["INGEST_AI_ENABLED"] === "0" || !process.env["OPENAI_API_KEY"]) return { items, used: 0, note: null };
+  if (process.env["INGEST_AI_ENABLED"] === "0" || !getAiProviderConfig()) return { items, used: 0, note: null };
   const max = Math.min(25, Math.max(0, Number(process.env["INGEST_AI_MAX"] ?? 5) || 0));
   let used = 0;
   const out: RawItem[] = [];
