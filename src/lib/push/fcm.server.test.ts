@@ -28,7 +28,7 @@ describe("Firebase opportunity push", () => {
     const calls: Array<{ url: string; init?: RequestInit }> = [];
     const fetcher: typeof fetch = async (input, init) => {
       const url = String(input);
-      calls.push({ url, init });
+      calls.push(init === undefined ? { url } : { url, init });
       if (url === "https://oauth2.googleapis.com/token") {
         return Response.json({ access_token: "test-access-token", expires_in: 3600 });
       }
