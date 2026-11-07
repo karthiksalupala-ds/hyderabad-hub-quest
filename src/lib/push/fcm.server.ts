@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import { createSign } from "node:crypto";
 
 const PUSH_TOPIC = "ihub_new_opportunities";
