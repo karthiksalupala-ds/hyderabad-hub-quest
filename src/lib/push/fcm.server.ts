@@ -62,7 +62,10 @@ function createSignedAssertion(account: FirebaseServiceAccount, nowSeconds = Mat
     exp: nowSeconds + 3600,
   }));
   const unsigned = `${header}.${claims}`;
-  const signature = createSign("RSA-SHA256").update(unsigned).end().sign(account.private_key).toString("base64url");
+  const signer = createSign("RSA-SHA256");
+  signer.update(unsigned);
+  signer.end();
+  const signature = signer.sign(account.private_key).toString("base64url");
   return `${unsigned}.${signature}`;
 }
 
