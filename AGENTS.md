@@ -19,6 +19,8 @@ These instructions are for AI coding agents working in this repository (for exam
 - `src/lib/agent/`: student-facing runtime assistant's skill router and grounding logic.
 - `src/hooks/`: frontend state, opportunities, and local profile.
 - `src/integrations/supabase/`: Supabase clients and generated database types.
+- `mobile/` and `capacitor.config.ts`: Capacitor Android shell and native build configuration.
+- `src/lib/push/`: server-side Firebase Cloud Messaging sender; credentials must remain server-only.
 - `supabase/migrations/`: database migrations.
 - `AGENT.md` and `SKILLS.md`: runtime assistant documentation.
 - `.github/workflows/ci.yml`: required CI checks.
@@ -37,6 +39,8 @@ These instructions are for AI coding agents working in this repository (for exam
 - Do not label demo/sample cards as real or verified opportunities.
 - Do not claim an email, push, WhatsApp message, external crawl, or reminder happened unless that capability is implemented and its result is known.
 - Avoid new dependencies unless necessary; explain the need and update the lockfile only when dependency changes are approved.
+- Keep Firebase service-account JSON, `google-services.json`, signing keys, and generated Android build output out of source control. The Android project is generated from Capacitor config for local or CI builds.
+- Send opportunity push alerts only for newly inserted, verified, active listings and only to the explicitly opted-in FCM topic; never weaken source verification or silently opt users in.
 - Keep changes focused. Do not perform mass formatting or unrelated refactors as part of a feature.
 
 ## Development conventions

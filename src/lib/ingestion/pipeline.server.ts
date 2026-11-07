@@ -4,6 +4,8 @@
  */
 import { adapterFor, type RawItem, type SourceRow } from "./adapters.server";
 import { AiStop, aiExtract } from "./ai-extract.server";
+import { sendNewOpportunityPush, type NewOpportunityPush } from "@/lib/push/fcm.server";
+import { getAiProviderConfig } from "@/lib/ai/provider-config.server";
 import { mergeAi } from "./mapping";
 import { canonicalizeUrl, contentHash, deriveTags, detectCity, detectMode, normalizeOrganizer, normalizeText } from "./normalize";
 import { detectChanges, isExpired, isSameOpportunity, MIN_POLL_MINUTES, nextPollMinutes, verifyCandidate } from "./verify";
@@ -20,7 +22,7 @@ function needsAi(it: RawItem): boolean {
 
 /** Bounded, optional AI stage. Disabled with INGEST_AI_ENABLED=0; max items via INGEST_AI_MAX (default 5, cap 25). */
 export async function aiStage(items: RawItem[]): Promise<{ items: RawItem[]; used: number; note: string | null }> {
-  if (process.env["INGEST_AI_ENABLED"] === "0" || !process.env["OPENAI_API_KEY"]) return { items, used: 0, note: null };
+  if (process.env["INGEST_AI_ENABLED"] === "0" || !getAiProviderConfig()) return { items, used: 0, note: null };
   const max = Math.min(25, Math.max(0, Number(process.env["INGEST_AI_MAX"] ?? 5) || 0));
   let used = 0;
   const out: RawItem[] = [];
@@ -55,6 +57,7 @@ export async function processItems(admin: Admin, src: SourceRow, rawItems: RawIt
   const c = { fetched: rawItems.length, inserted: 0, updated: 0, rejected: 0, duplicates: 0, accepted: 0, needs_verification: 0 };
   const errors: string[] = ai.note ? [ai.note] : [];
   const seen = new Set<string>();
+  const newlyVerified: NewOpportunityPush[] = [];
   const today = new Date().toISOString().slice(0, 10);
 
   for (const it of ai.items) {
@@ -112,12 +115,27 @@ export async function processItems(admin: Admin, src: SourceRow, rawItems: RawIt
         const { data: ins, error } = await admin.from("opportunities").insert({ ...row, content_hash, last_checked_at: now }).select("id").single();
         if (error || !ins) { c.rejected++; errors.push(`insert failed: ${error?.message ?? "unknown"}`); continue; }
         c.inserted++;
+        if (gate.status === "verified" && row.status === "active") {
+          newlyVerified.push({ kind: row.kind, title: row.title, organizer: row.organizer });
+        }
         await admin.from("opportunity_changes").insert({ opportunity_id: ins.id, run_id: run.id, change_type: "new", new_value: row.title });
       }
       if (gate.status === "verified") c.accepted++;
     } catch (e) {
       c.rejected++;
       errors.push(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  let pushStatus: "not_needed" | "sent" | "not_configured" | "failed" = "not_needed";
+  if (newlyVerified.length) {
+    try {
+      pushStatus = await sendNewOpportunityPush(newlyVerified);
+      if (pushStatus === "not_configured") errors.push("Firebase push is not configured; new-opportunity alerts were skipped.");
+    } catch {
+      // Push failure must not roll back a successful ingestion run.
+      pushStatus = "failed";
+      errors.push("Firebase push notification delivery failed.");
     }
   }
 
@@ -131,10 +149,10 @@ export async function processItems(admin: Admin, src: SourceRow, rawItems: RawIt
   }).eq("id", run.id);
   await admin.from("source_registry").update({
     status: "ready", requirement: null, last_run_at: fin, last_success_at: fin, last_error: null,
-    last_counts: { ...c, expired, ai_used: ai.used }, consecutive_empty_runs: empty,
+    last_counts: { ...c, expired, ai_used: ai.used, push_status: pushStatus, push_recipients_topic: newlyVerified.length ? "ihub_new_opportunities" : null }, consecutive_empty_runs: empty,
     next_run_at: new Date(Date.now() + nextPollMinutes(src.poll_interval_minutes, empty) * 60_000).toISOString(),
   }).eq("id", src.id);
-  return { ...c, expired, ai_used: ai.used, run_id: run.id };
+  return { ...c, expired, ai_used: ai.used, push_status: pushStatus, run_id: run.id };
 }
 
 /** Safe expiry: a stated past deadline, or (without deadline) a stated past end date. Unknown dates never expire. */

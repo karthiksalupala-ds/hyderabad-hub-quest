@@ -1,0 +1,83 @@
+name: Build iHub Android APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ihub-android-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Android debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      VITE_IHUB_APP_URL: ${{ vars.IHUB_BASE_URL }}
+      FIREBASE_GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.FIREBASE_GOOGLE_SERVICES_JSON_BASE64 }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Validate Android build configuration
+        shell: bash
+        run: |
+          if [[ -z "$VITE_IHUB_APP_URL" || "$VITE_IHUB_APP_URL" != https://* ]]; then
+            echo "::error::Set the IHUB_BASE_URL repository variable to the deployed HTTPS iHub URL."
+            exit 1
+          fi
+          if [[ -z "$FIREBASE_GOOGLE_SERVICES_JSON_BASE64" ]]; then
+            echo "::error::Set the FIREBASE_GOOGLE_SERVICES_JSON_BASE64 repository secret from Firebase's google-services.json file."
+            exit 1
+          fi
+
+      - name: Install JavaScript dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build local Capacitor shell
+        run: bun run build:android-shell
+
+      - name: Generate Android project
+        run: bun run android:add
+
+      - name: Configure Firebase Android app
+        shell: bash
+        run: |
+          printf '%s' "$FIREBASE_GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > android/app/google-services.json
+          if ! grep -q '"package_name": "com.ihub.studenthub"' android/app/google-services.json; then
+            echo "::error::The Firebase Android app package name must be com.ihub.studenthub."
+            exit 1
+          fi
+
+      - name: Sync Capacitor plugins
+        run: bunx cap sync android
+
+      - name: Assemble debug APK
+        shell: bash
+        run: |
+          chmod +x android/gradlew
+          cd android
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihub-android-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
