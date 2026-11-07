@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useProfile } from "@/hooks/use-profile";
 import { AgentStatus } from "@/components/agent-status";
+import { PushNotificationControl } from "@/components/push-notification-control";
 import { ALL_TAGS } from "@/lib/types";
 
 export const Route = createFileRoute("/settings")({
@@ -74,7 +75,8 @@ function SettingsPage() {
         </Card>
         <Card className="card-elevated space-y-4 p-5">
           <h2 className="font-semibold">Notifications</h2>
-          <p className="text-xs text-muted-foreground">Preferences only — reminders arrive once live integrations launch.</p>
+          <p className="text-xs text-muted-foreground">Manage new opportunity alerts on this Android device.</p>
+          <PushNotificationControl />
           {(
             [
               ["notifyEmail", "Email updates"],
