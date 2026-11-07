@@ -99,6 +99,28 @@ The repository includes adapters and an ingestion API, but it does not discover 
 
 If `IHUB_BASE_URL` or the GitHub `INGEST_SECRET` is missing, the scheduled workflow reports that configuration is missing and skips the HTTP request. Configured sources still need to be enabled in `source_registry`; adding credentials does not silently re-enable a source someone disabled.
 
+## Android app and push notifications
+
+iHub can be packaged as an Android app with Capacitor. The Android shell loads the deployed iHub HTTPS website and exposes native Firebase Cloud Messaging (FCM) controls to the Settings page. The web app remains usable without the Android shell.
+
+### Android app setup
+
+1. Set the deployed website URL in the GitHub repository variable `IHUB_BASE_URL`. The Android shell build reads this URL as `VITE_IHUB_APP_URL`.
+2. Create a Firebase project and register an Android app with package ID `com.ihub.studenthub`. Enable Firebase Cloud Messaging and download its `google-services.json` file.
+3. Base64-encode that file and add it as the GitHub Actions secret `FIREBASE_GOOGLE_SERVICES_JSON_BASE64`. Do not commit the file or put it in a web environment variable.
+4. Add the Firebase service-account JSON to the deployed app server as `FIREBASE_SERVICE_ACCOUNT_JSON`. This is a separate server-only credential used to send notifications through FCM HTTP v1. Never expose it in the Android app or browser.
+5. Run **Actions → Build iHub Android APK → Run workflow**. Download the `ihub-android-debug-apk` artifact and install the APK on an Android test device.
+
+For local Android Studio development, install Android Studio 2025.2.1 or newer with an Android SDK (API 24+), JDK 21, and Bun. Then run `bun install`, set `VITE_IHUB_APP_URL` in the build environment, run `bun run android:add` once, then `bun run android:sync` and open the generated `android/` project with `bun run android:open`. Capacitor 8 requires the current Android tooling; see the [Capacitor Android setup guide](https://capacitorjs.com/docs/getting-started/environment-setup).
+
+### Notification behavior
+
+The **New opportunity notifications** setting is available in the Android app only. It is off by default. When a student explicitly turns it on and grants Android notification permission, the device subscribes to the shared FCM topic `ihub_new_opportunities`. Turning it off unsubscribes that device. Each ingestion run sends one summary push only when it has newly inserted, verified, active opportunities; updates, duplicates, expired, and unverified records do not trigger alerts. A push delivery failure is recorded in the ingestion run's existing errors and does not roll back opportunity ingestion.
+
+This first release uses a public-opportunity topic rather than storing individual device tokens. Notifications are broadcast to all opted-in Android installs; there is no per-student filtering. Firebase setup is required for real delivery. Without the Google Services file in the Android build and `FIREBASE_SERVICE_ACCOUNT_JSON` on the server, push notifications cannot be delivered. Android 13+ users must grant notification permission. The initial notification opens the iHub dashboard.
+
+No Supabase schema change is required for this topic-based opt-in model.
+
 ## Ask iHub AI assistant
 
 The `/assistant` page provides five server-side skills: opportunity discovery, stored-record verification, profile matching, recent tracked changes, and upcoming-deadline lookup. The assistant reads only active listings whose `verification_status` is `verified`; it does not treat built-in demo cards as real data.
