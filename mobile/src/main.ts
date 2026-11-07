@@ -34,29 +34,20 @@ const target = validAppUrl(appUrl);
 if (!frame || !target || !Capacitor.isNativePlatform()) {
   showStatus("Set VITE_IHUB_APP_URL to the deployed HTTPS iHub website before building the Android app.");
 } else {
-  let pendingOpenPath: string | null = null;
-
   const sendToApp = (type: string, details: Record<string, unknown> = {}) => {
     frame.contentWindow?.postMessage({ source: "ihub-native", type, ...details }, target.origin);
   };
 
   const openInApp = (value: unknown) => {
     if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) return;
-    if (!frame.contentWindow) {
-      pendingOpenPath = value;
-      return;
-    }
-    sendToApp("push:open", { url: value });
+    const destination = new URL(value, target);
+    if (destination.origin !== target.origin) return;
+    frame.src = destination.toString();
   };
 
   frame.addEventListener("load", () => {
     showApp();
     sendToApp("push:ready", { enabled: localStorage.getItem(PUSH_ENABLED_KEY) === "true" });
-    if (pendingOpenPath) {
-      const path = pendingOpenPath;
-      pendingOpenPath = null;
-      openInApp(path);
-    }
   });
 
   frame.src = target.toString();
